@@ -1,14 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "lh3.googleusercontent.com",
-      },
-    ],
-  },
   async headers() {
     return [
       {
@@ -28,7 +20,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=()",
+            value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
           },
           {
             key: "X-DNS-Prefetch-Control",
@@ -36,7 +28,11 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Strict-Transport-Security",
-            value: "max-age=31536000; includeSubDomains",
+            value: "max-age=63072000; includeSubDomains; preload",
+          },
+          {
+            key: "Content-Security-Policy",
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://generativelanguage.googleapis.com; frame-ancestors 'none';",
           },
         ],
       },

@@ -22,18 +22,23 @@ export async function analyzeProfile(
       return { success: false, error: "Faça login para continuar" };
     }
 
-    const raw = {
-      type: formData.get("type") as string,
-      linkedinUrl: formData.get("linkedinUrl") as string | null,
-      fileBase64: formData.get("fileBase64") as string | null,
-      fileName: formData.get("fileName") as string | null,
-    };
+    const type = formData.get("type") as string | null;
+    const linkedinUrl = formData.get("linkedinUrl") as string | null;
+    const fileBase64 = formData.get("fileBase64") as string | null;
+    const fileName = formData.get("fileName") as string | null;
 
-    const cleaned = Object.fromEntries(
-      Object.entries(raw).filter(([, v]) => v !== null)
-    );
+    // Build payload removing empty/null values
+    const payload: Record<string, string> = {};
+    if (type) payload.type = type;
+    if (linkedinUrl) payload.linkedinUrl = linkedinUrl;
+    if (fileBase64) payload.fileBase64 = fileBase64;
+    if (fileName) payload.fileName = fileName;
 
-    const parsed = analyzeSchema.parse(cleaned);
+    const result = analyzeSchema.safeParse(payload);
+    if (!result.success) {
+      return { success: false, error: result.error.issues[0]?.message ?? "Dados inválidos" };
+    }
+    const parsed = result.data;
 
     let textToAnalyze: string;
 
@@ -67,6 +72,7 @@ export async function analyzeProfile(
       },
     };
   } catch (err) {
+    console.error("[analyzeProfile error]", err);
     const message = err instanceof Error ? err.message : "Erro desconhecido";
     return { success: false, error: message };
   }

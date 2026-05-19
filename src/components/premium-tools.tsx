@@ -10,7 +10,8 @@ interface PremiumToolsProps {
 
 type Tab = "about" | "calendar" | "tips";
 
-export function PremiumTools({ userName }: PremiumToolsProps) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function PremiumTools(_props: PremiumToolsProps) {
   const [activeTab, setActiveTab] = useState<Tab>("about");
   const [content, setContent] = useState<PremiumContent | null>(null);
   const [isPending, startTransition] = useTransition();

@@ -10,6 +10,10 @@
     color-scheme: dark;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     background: #09090b;
     color: #fafafa;
@@ -35,15 +39,35 @@
 
   /* Focus visible for keyboard navigation */
   :focus-visible {
-    outline: 2px solid rgba(6, 182, 212, 0.5);
+    outline: 2px solid rgba(6, 182, 212, 0.6);
     outline-offset: 2px;
     border-radius: 4px;
+  }
+
+  /* Remove focus ring for mouse users */
+  :focus:not(:focus-visible) {
+    outline: none;
   }
 
   /* Selection */
   ::selection {
     background: rgba(6, 182, 212, 0.3);
     color: white;
+  }
+
+  /* Ensure minimum tap target size on mobile */
+  button,
+  a,
+  [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Improve link visibility */
+  a:not([class]) {
+    color: #06b6d4;
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 }
 
@@ -54,6 +78,19 @@
 
   .animate-fade-in-up {
     animation: fade-in-up 0.5s ease-out forwards;
+  }
+
+  /* Screen reader only */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
   }
 }
 
@@ -75,13 +112,30 @@
 
 /* Reduce motion for accessibility */
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
   .animate-glow,
   .animate-fade-in-up {
     animation: none;
   }
 
-  * {
-    transition-duration: 0.01ms !important;
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* High contrast mode support */
+@media (forced-colors: active) {
+  .bg-gradient-to-r {
+    background: ButtonFace;
+    color: ButtonText;
+    border: 1px solid ButtonText;
   }
 }
