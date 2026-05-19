@@ -27,9 +27,11 @@ export function DashboardClient({
   const [isPending, startTransition] = useTransition();
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState("");
+  const [uploadKey, setUploadKey] = useState(0);
 
   const handleSubmit = (formData: FormData) => {
     setError("");
+    setResult(null);
     startTransition(async () => {
       const response = await analyzeProfile(formData);
       if (response.success && response.data) {
@@ -38,6 +40,12 @@ export function DashboardClient({
         setError(response.error ?? "Erro ao analisar perfil");
       }
     });
+  };
+
+  const handleNewAnalysis = () => {
+    setResult(null);
+    setError("");
+    setUploadKey((k) => k + 1);
   };
 
   const greeting = getGreeting();
@@ -167,7 +175,7 @@ export function DashboardClient({
                   Cole a URL do LinkedIn ou envie seu currículo em PDF
                 </p>
               </div>
-              <UploadZone onSubmit={handleSubmit} isLoading={isPending} />
+              <UploadZone key={uploadKey} onSubmit={handleSubmit} isLoading={isPending} />
               {error && (
                 <p
                   role="alert"
@@ -186,7 +194,7 @@ export function DashboardClient({
             <ResultsView result={result} />
             <div className="flex flex-wrap justify-center gap-3">
               <button
-                onClick={() => setResult(null)}
+                onClick={handleNewAnalysis}
                 className="rounded-xl border border-white/10 px-6 py-3 text-sm text-zinc-300 transition-all hover:border-white/20 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
               >
                 ← Nova Análise
