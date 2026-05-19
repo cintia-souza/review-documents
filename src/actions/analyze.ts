@@ -13,6 +13,20 @@ interface ActionResponse {
   error?: string;
 }
 
+function getField(formData: FormData, name: string): string | null {
+  // Next.js Server Actions can prefix fields with _N_
+  const direct = formData.get(name) as string | null;
+  if (direct) return direct;
+
+  // Search for prefixed versions
+  for (const [key, value] of formData.entries()) {
+    if (key.endsWith(`_${name}`) && typeof value === "string") {
+      return value;
+    }
+  }
+  return null;
+}
+
 export async function analyzeProfile(
   formData: FormData
 ): Promise<ActionResponse> {
@@ -22,12 +36,11 @@ export async function analyzeProfile(
       return { success: false, error: "Faça login para continuar" };
     }
 
-    const type = formData.get("type") as string | null;
-    const linkedinUrl = formData.get("linkedinUrl") as string | null;
-    const fileBase64 = formData.get("fileBase64") as string | null;
-    const fileName = formData.get("fileName") as string | null;
+    const type = getField(formData, "type");
+    const linkedinUrl = getField(formData, "linkedinUrl");
+    const fileBase64 = getField(formData, "fileBase64");
+    const fileName = getField(formData, "fileName");
 
-    // Build payload removing empty/null values
     const payload: Record<string, string> = {};
     if (type) payload.type = type;
     if (linkedinUrl) payload.linkedinUrl = linkedinUrl;
