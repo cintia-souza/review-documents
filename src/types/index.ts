@@ -28,6 +28,7 @@ export interface AnalyzePayload {
 }
 
 export interface PremiumContent {
+  optimizedHeadline?: string;
   aboutRewrite: string;
   experienceRewrites: string[];
   editorialCalendar: PostIdea[];

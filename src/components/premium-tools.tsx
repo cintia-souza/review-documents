@@ -8,7 +8,7 @@ interface PremiumToolsProps {
   userName: string | null;
 }
 
-type Tab = "about" | "calendar" | "tips";
+type Tab = "rewrite" | "about" | "calendar" | "tips";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function PremiumTools(_props: PremiumToolsProps) {
@@ -18,6 +18,7 @@ export function PremiumTools(_props: PremiumToolsProps) {
   const [context, setContext] = useState("");
 
   const tabs: { key: Tab; label: string; icon: string }[] = [
+    { key: "rewrite", label: "Perfil Otimizado", icon: "🚀" },
     { key: "about", label: "Reescrita IA", icon: "✍️" },
     { key: "calendar", label: "Calendário Editorial", icon: "📅" },
     { key: "tips", label: "Dicas Avançadas", icon: "🎯" },
@@ -64,6 +65,7 @@ export function PremiumTools(_props: PremiumToolsProps) {
           htmlFor="context-input"
           className="mb-2 block text-sm font-medium text-zinc-300"
         >
+          {activeTab === "rewrite" && "Cole seu perfil atual (headline + sobre + experiências) ou o texto do currículo:"}
           {activeTab === "about" && "Cole seu texto atual do 'Sobre' ou descreva sua área de atuação:"}
           {activeTab === "calendar" && "Descreva seu nicho, público-alvo e temas de interesse:"}
           {activeTab === "tips" && "Cole a URL do seu perfil ou descreva seu posicionamento atual:"}
@@ -74,11 +76,13 @@ export function PremiumTools(_props: PremiumToolsProps) {
           onChange={(e) => setContext(e.target.value)}
           rows={4}
           placeholder={
-            activeTab === "about"
-              ? "Ex: Sou desenvolvedor full-stack com 5 anos de experiência em React e Node.js..."
-              : activeTab === "calendar"
-                ? "Ex: Atuo com marketing digital para startups B2B SaaS..."
-                : "Ex: https://linkedin.com/in/meu-perfil ou descreva seu posicionamento..."
+            activeTab === "rewrite"
+              ? "Cole aqui seu headline, texto do Sobre e descrições de experiência atuais. Quanto mais contexto, melhor a reescrita..."
+              : activeTab === "about"
+                ? "Ex: Sou desenvolvedor full-stack com 5 anos de experiência em React e Node.js..."
+                : activeTab === "calendar"
+                  ? "Ex: Atuo com marketing digital para startups B2B SaaS..."
+                  : "Ex: https://linkedin.com/in/meu-perfil ou descreva seu posicionamento..."
           }
           className="w-full resize-none rounded-xl border border-white/10 bg-zinc-800/50 px-4 py-3 text-sm text-white placeholder-zinc-500 outline-none transition-all focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30"
         />
@@ -95,6 +99,7 @@ export function PremiumTools(_props: PremiumToolsProps) {
             </span>
           ) : (
             <>
+              {activeTab === "rewrite" && "✨ Gerar Perfil Otimizado"}
               {activeTab === "about" && "✨ Gerar Reescrita"}
               {activeTab === "calendar" && "✨ Gerar Calendário"}
               {activeTab === "tips" && "✨ Gerar Dicas Avançadas"}
@@ -106,9 +111,116 @@ export function PremiumTools(_props: PremiumToolsProps) {
       {/* Results */}
       {content && (
         <div className="space-y-6 animate-fade-in-up">
+          {activeTab === "rewrite" && <RewriteResult content={content} />}
           {activeTab === "about" && <AboutResult content={content} />}
           {activeTab === "calendar" && <CalendarResult ideas={content.editorialCalendar} />}
           {activeTab === "tips" && <TipsResult tips={content.advancedTips} />}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function RewriteResult({ content }: { content: PremiumContent }) {
+  const copySection = (text: string) => navigator.clipboard.writeText(text);
+
+  return (
+    <div className="space-y-4">
+      {/* Headline */}
+      {content.optimizedHeadline && (
+        <div className="rounded-2xl border border-emerald-500/20 bg-zinc-900/80 p-6">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-lg" aria-hidden="true">🎯</span>
+              <h3 className="font-semibold text-white">Headline Otimizado</h3>
+            </div>
+            <span className="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-medium text-emerald-400">
+              Peso: 35% no algoritmo
+            </span>
+          </div>
+          <div className="rounded-xl bg-zinc-800/50 p-4">
+            <p className="text-sm font-medium leading-relaxed text-white">
+              {content.optimizedHeadline}
+            </p>
+          </div>
+          <p className="mt-2 text-xs text-zinc-500">
+            → Keywords nas primeiras palavras • Otimizado para buscas booleanas
+          </p>
+          <button
+            onClick={() => copySection(content.optimizedHeadline ?? "")}
+            className="mt-3 flex items-center gap-2 rounded-lg border border-white/10 px-4 py-2 text-xs text-zinc-400 transition-colors hover:border-white/20 hover:text-white"
+          >
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+            Copiar headline
+          </button>
+        </div>
+      )}
+
+      {/* About */}
+      {content.aboutRewrite && (
+        <div className="rounded-2xl border border-cyan-500/20 bg-zinc-900/80 p-6">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-lg" aria-hidden="true">✍️</span>
+              <h3 className="font-semibold text-white">Seção Sobre Otimizada</h3>
+            </div>
+            <span className="rounded-full bg-cyan-500/10 px-2.5 py-0.5 text-[10px] font-medium text-cyan-400">
+              Peso: 25% no algoritmo
+            </span>
+          </div>
+          <div className="rounded-xl bg-zinc-800/50 p-4">
+            <p className="whitespace-pre-wrap text-sm leading-relaxed text-zinc-300">
+              {content.aboutRewrite}
+            </p>
+          </div>
+          <p className="mt-2 text-xs text-zinc-500">
+            → Hook nas 2 primeiras linhas • Keywords naturais • CTA no final
+          </p>
+          <button
+            onClick={() => copySection(content.aboutRewrite)}
+            className="mt-3 flex items-center gap-2 rounded-lg border border-white/10 px-4 py-2 text-xs text-zinc-400 transition-colors hover:border-white/20 hover:text-white"
+          >
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+            Copiar texto
+          </button>
+        </div>
+      )}
+
+      {/* Experiences */}
+      {content.experienceRewrites.length > 0 && (
+        <div className="rounded-2xl border border-violet-500/20 bg-zinc-900/80 p-6">
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-lg" aria-hidden="true">💼</span>
+              <h3 className="font-semibold text-white">Experiências Otimizadas</h3>
+            </div>
+            <span className="rounded-full bg-violet-500/10 px-2.5 py-0.5 text-[10px] font-medium text-violet-400">
+              Peso: 40% no algoritmo
+            </span>
+          </div>
+          <div className="space-y-3">
+            {content.experienceRewrites.map((exp, i) => (
+              <div key={i} className="group rounded-xl bg-zinc-800/50 p-4">
+                <p className="text-sm leading-relaxed text-zinc-300">{exp}</p>
+                <button
+                  onClick={() => copySection(exp)}
+                  className="mt-2 flex items-center gap-1 text-[10px] text-zinc-500 opacity-0 transition-opacity group-hover:opacity-100"
+                >
+                  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                  Copiar
+                </button>
+              </div>
+            ))}
+          </div>
+          <p className="mt-3 text-xs text-zinc-500">
+            → Verbo de ação + Métrica + Contexto • Otimizado para Find Similar
+          </p>
         </div>
       )}
     </div>

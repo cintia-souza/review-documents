@@ -13,10 +13,26 @@ interface PremiumResponse {
 
 const inputSchema = z.object({
   context: z.string().min(10, "Contexto muito curto").max(5000, "Contexto muito longo"),
-  tab: z.enum(["about", "calendar", "tips"]),
+  tab: z.enum(["rewrite", "about", "calendar", "tips"]),
 });
 
 const PROMPTS = {
+  rewrite: `Você é um especialista em LinkedIn Recruiter, Skill Graph Modeling, Metodologia CHA e NER/TF-IDF.
+Com base no perfil/currículo fornecido, REESCREVA o perfil completo otimizado para o algoritmo do LinkedIn Recruiter.
+
+REGRAS DE REESCRITA:
+1. HEADLINE: Coloque as 3 principais Hard Skills nas primeiras palavras. Use formato "Cargo | Skill1 | Skill2 | Skill3". Sem frases poéticas.
+2. SOBRE: Começe com hook nas 2 primeiras linhas (métrica de impacto ou proposta de valor). Inclua keywords do cargo-alvo naturalmente. Termine com CTA.
+3. EXPERIÊNCIAS: Use formato "Verbo de ação + Métrica quantificável + Contexto". Mostre progressão clara.
+
+Gere JSON com:
+- optimizedHeadline: string com o headline otimizado
+- aboutRewrite: texto do Sobre otimizado (máx 300 palavras)
+- experienceRewrites: array com 3-4 descrições de experiência reescritas
+- editorialCalendar: array vazio
+- advancedTips: array vazio
+Responda APENAS com JSON válido.`,
+
   about: `Você é um especialista em branding pessoal no LinkedIn.
 Com base no contexto fornecido, gere:
 - aboutRewrite: um texto de "Sobre" profissional, impactante, com hook nas primeiras linhas (máx 300 palavras)
@@ -44,7 +60,7 @@ Responda APENAS com JSON válido.`,
 
 export async function generatePremiumContent(
   context: string,
-  tab: "about" | "calendar" | "tips"
+  tab: "rewrite" | "about" | "calendar" | "tips"
 ): Promise<PremiumResponse> {
   try {
     // 1. Auth check
@@ -117,7 +133,22 @@ export async function generatePremiumContent(
   }
 }
 
-function simulatedContent(tab: "about" | "calendar" | "tips"): PremiumContent {
+function simulatedContent(tab: "rewrite" | "about" | "calendar" | "tips"): PremiumContent {
+  if (tab === "rewrite") {
+    return {
+      optimizedHeadline: "Desenvolvedora Full-Stack | React | Next.js | TypeScript | Node.js",
+      aboutRewrite:
+        "🚀 +20 projetos entregues impactando 500K+ usuários em 5 anos de desenvolvimento.\n\nConecto tecnologia com estratégia de negócio para criar produtos digitais que geram resultado mensurável. Especialista em React/Next.js com foco em performance e experiência do usuário.\n\n📊 Resultados que entrego:\n• Redução de 70% no tempo de deploy via CI/CD\n• Aumento de 40% em conversão com otimização de Core Web Vitals\n• NPS +18 pontos após reestruturação de produto\n\n💡 Stack: React, Next.js, TypeScript, Node.js, PostgreSQL, AWS\n\n📩 Aberta a novas oportunidades. Vamos conversar?",
+      experienceRewrites: [
+        "Liderei squad de 8 devs na migração de monolito para microsserviços, reduzindo tempo de deploy de 4h para 12min e elevando uptime para 99.9% — impactando 200K usuários ativos.",
+        "Arquitetei e implementei pipeline de CI/CD com GitHub Actions que reduziu bugs em produção em 73% e acelerou ciclo de entregas em 2x, resultando em NPS +18 pontos.",
+        "Otimizei Core Web Vitals (LCP, FID, CLS) de 3 produtos SaaS, gerando aumento de 40% na taxa de conversão e redução de 25% no bounce rate.",
+      ],
+      editorialCalendar: [],
+      advancedTips: [],
+    };
+  }
+
   if (tab === "about") {
     return {
       aboutRewrite:
