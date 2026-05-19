@@ -9,7 +9,7 @@ interface UploadZoneProps {
 
 export function UploadZone({ onSubmit, isLoading }: UploadZoneProps) {
   const [mode, setMode] = useState<"url" | "file">("url");
-  const [url, setUrl] = useState("");
+  const [urlValue, setUrlValue] = useState("");
   const [fileName, setFileName] = useState("");
   const [isDragging, setIsDragging] = useState(false);
   const [fileBase64, setFileBase64] = useState("");
@@ -30,7 +30,7 @@ export function UploadZone({ onSubmit, isLoading }: UploadZoneProps) {
     const fd = new FormData();
     if (mode === "url") {
       fd.set("type", "linkedin_url");
-      fd.set("linkedinUrl", url);
+      fd.set("linkedinUrl", urlValue);
     } else {
       fd.set("type", "pdf_upload");
       fd.set("fileBase64", fileBase64);
@@ -39,7 +39,7 @@ export function UploadZone({ onSubmit, isLoading }: UploadZoneProps) {
     onSubmit(fd);
   };
 
-  const canSubmit = mode === "url" ? url.length > 0 : fileBase64.length > 0;
+  const canSubmit = mode === "url" ? urlValue.length > 0 : fileBase64.length > 0;
 
   return (
     <div className="mx-auto w-full max-w-2xl space-y-6">
@@ -96,8 +96,8 @@ export function UploadZone({ onSubmit, isLoading }: UploadZoneProps) {
             </div>
             <input
               type="url"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
+              value={urlValue}
+              onChange={(e) => setUrlValue(e.target.value)}
               placeholder="https://linkedin.com/in/seu-perfil"
               aria-label="URL do perfil LinkedIn"
               className="w-full rounded-2xl border border-white/10 bg-zinc-900/80 py-4 pl-12 pr-5 text-white placeholder-zinc-500 outline-none backdrop-blur-sm transition-all focus:border-cyan-500/50 focus:shadow-[0_0_30px_rgba(6,182,212,0.08)] focus:ring-1 focus:ring-cyan-500/30"
