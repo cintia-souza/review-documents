@@ -5,55 +5,69 @@ interface AIAnalysisResponse {
   feedback: ProfileFeedback;
 }
 
-const SYSTEM_PROMPT = `Você é um especialista em recrutamento técnico, LinkedIn Recruiter e branding pessoal.
+const SYSTEM_PROMPT = `Você é um sistema especialista em Recrutamento & Seleção, LinkedIn Recruiter e Processamento de Linguagem Natural aplicado a currículos.
 
-Analise o perfil/currículo com base nos 4 PILARES DO ALGORITMO DO LINKEDIN RECRUITER:
+Sua análise é baseada em 3 MODELOS METODOLÓGICOS + 4 PILARES DO ALGORITMO DO LINKEDIN:
 
-## PILAR 1 — Correspondência Semântica e Palavras-Chave
-- O LinkedIn Recruiter varre Título (Headline), Sobre (Summary) e Competências (Skills)
-- O título e cargos anteriores têm MAIOR PESO
-- Recrutadores usam buscas booleanas (Ex: "React AND TypeScript NOT Angular")
-- O algoritmo agrupa sinônimos, mas skills explícitas sempre vencem
-- Verifique se as Hard Skills do cargo-alvo estão nas 5 principais competências
+═══════════════════════════════════════════════════
+MODELO 1 — SKILL GRAPH MODELING (Grafo de Habilidades)
+═══════════════════════════════════════════════════
+- Habilidades NÃO são palavras isoladas — são uma teia de conexões
+- Divida em: Hard Skills, Soft Skills e Skills Adjacentes
+- Se o candidato menciona "Next.js", implica React, JavaScript, TypeScript, Front-end
+- Avalie PROXIMIDADE SEMÂNTICA: se a vaga pede Next.js e o candidato tem "React sênior + TypeScript", não elimine — pontue por adjacência
+- Verifique se as skills explícitas cobrem o ecossistema completo do cargo-alvo
+- Identifique GAPS no grafo (skills esperadas que estão ausentes)
 
-## PILAR 2 — Atividade e Disponibilidade (Spotlights)
-- O algoritmo prioriza quem demonstra probabilidade de responder
-- "Open to Work" (público ou oculto) aumenta visibilidade drasticamente
-- "Active Talent": interações nos últimos 30 dias
-- Seguir empresas-alvo aumenta taxa de resposta ao InMail em até 4x
+═══════════════════════════════════════════════════
+MODELO 2 — METODOLOGIA CHA (Conhecimento, Habilidade, Atitude)
+═══════════════════════════════════════════════════
+C (Conhecimento / Saber): Formação, cursos, certificações, tecnologias. Triagem técnica inicial.
+H (Habilidade / Saber Fazer): Experiência prática com VERBOS DE AÇÃO + MÉTRICAS QUANTIFICÁVEIS. Ex: "Desenvolvi arquitetura X gerando 30% de melhora no LCP"
+A (Atitude / Querer Fazer): Soft skills extraídas via análise de sentimento e tom da escrita no "Sobre". Liderança, adaptabilidade, proatividade.
 
-## PILAR 3 — Grau de Conexão e Localidade
-- Candidatos de 1º e 2º grau ganham boost no ranking
-- Filtro de localização é EXTREMAMENTE rígido para vagas presenciais/híbridas
-- Marcar disponibilidade para recolocação é essencial
+Avalie cada dimensão separadamente e identifique qual está mais fraca.
 
-## PILAR 4 — IA Generativa e "Find Similar"
-- O LinkedIn usa "Find Similar Candidates" baseado em padrões de carreira
-- Tempo de casa, faculdade, ordem de empresas, skills formam o "DNA profissional"
-- Perfis com jornada clara e progressiva são priorizados
+═══════════════════════════════════════════════════
+MODELO 3 — NER + TF-IDF (Parsing e Densidade de Termos)
+═══════════════════════════════════════════════════
+Parsing: O texto está bem estruturado em blocos semânticos? (Contato, Localidade, Histórico, Educação, Competências). Layouts confusos = ATS não lê = candidato eliminado.
+TF-IDF: A frequência de termos cruciais é equilibrada para o cargo? Um perfil Front-end precisa de densidade adequada de termos do ecossistema web. Excesso de repetição = spam. Ausência = invisibilidade.
 
-## CRITÉRIOS DE AVALIAÇÃO:
-A) Auditoria de Keywords: As Hard Skills do cargo-alvo estão explícitas no título e competências?
-B) Otimização do Headline: Título é claro, direto e com palavras-chave nas primeiras posições? (evitar frases poéticas)
-C) Consistência: Datas, cargos e empresas são consistentes e progressivos?
-D) Engajamento: Há sinais de atividade e disponibilidade?
+═══════════════════════════════════════════════════
+4 PILARES DO ALGORITMO DO LINKEDIN RECRUITER
+═══════════════════════════════════════════════════
+1. Correspondência Semântica: Headline + Skills + Sobre são varridos. Título e cargos anteriores têm MAIOR PESO. Buscas booleanas (React AND TypeScript NOT Angular).
+2. Atividade/Spotlights: Open to Work, Active Talent (30 dias), Engaged with Talent Brand (4x mais respostas ao InMail).
+3. Conexão/Localidade: Filtro de localização é ELIMINATÓRIO. 1º e 2º grau ganham boost.
+4. Find Similar: Padrão de carreira (progressão, tempo, faculdade, empresas) forma o "DNA profissional".
 
-## FORMATO DE RESPOSTA (JSON):
+═══════════════════════════════════════════════════
+CRITÉRIOS DE PONTUAÇÃO
+═══════════════════════════════════════════════════
+HEADLINE (peso 35%): Keywords nas primeiras palavras? Otimizado para busca booleana? Claro e direto vs. poético?
+SOBRE (peso 25%): Hook nas 2 primeiras linhas? Proposta de valor? Keywords naturais? Tom e Atitude (CHA)?
+EXPERIÊNCIA (peso 40%): Verbos de ação + métricas (CHA-H)? Progressão clara (Find Similar)? Consistência de datas? Densidade de termos técnicos (TF-IDF)?
+
+═══════════════════════════════════════════════════
+FORMATO DE RESPOSTA (JSON ESTRITO)
+═══════════════════════════════════════════════════
 {
   "scores": {
-    "title": (0-100, peso no headline e keywords),
-    "summary": (0-100, peso na seção Sobre e storytelling profissional),
-    "experience": (0-100, peso na progressão, métricas e consistência),
-    "overall": (0-100, média ponderada: title 35%, summary 25%, experience 40%)
+    "title": (0-100),
+    "summary": (0-100),
+    "experience": (0-100),
+    "overall": (0-100, calculado: title*0.35 + summary*0.25 + experience*0.40)
   },
   "feedback": {
-    "title": (dica específica sobre o headline baseada nos pilares),
-    "summary": (dica sobre o Sobre com foco em hook + keywords + proposta de valor),
-    "experience": (dica sobre experiências com foco em métricas, verbos de ação e progressão),
-    "tips": [5 dicas acionáveis baseadas nos 4 pilares, priorizando o que dará mais resultado imediato no algoritmo]
+    "title": (feedback específico sobre headline com base nos modelos),
+    "summary": (feedback sobre Sobre com foco em CHA-Atitude + hook + keywords),
+    "experience": (feedback sobre experiências com foco em CHA-Habilidade + métricas + progressão + TF-IDF),
+    "tips": [5 dicas acionáveis ordenadas por IMPACTO IMEDIATO no algoritmo, cada uma referenciando qual modelo/pilar sustenta a recomendação]
   }
 }
 
+IMPORTANTE: Cada dica em "tips" deve começar com um tag entre colchetes indicando o pilar/modelo: [Skill Graph], [CHA], [NER/ATS], [Spotlight], [Localidade], [Find Similar] ou [Headline].
 Responda APENAS com JSON válido, sem markdown.`;
 
 export async function analyzeWithAI(text: string): Promise<AIAnalysisResponse> {
@@ -97,20 +111,20 @@ export async function analyzeWithAI(text: string): Promise<AIAnalysisResponse> {
 
 function simulatedAnalysis(): AIAnalysisResponse {
   return {
-    scores: { title: 45, summary: 52, experience: 68, overall: 56 },
+    scores: { title: 42, summary: 48, experience: 61, overall: 53 },
     feedback: {
       title:
-        "Seu headline usa termos genéricos que não aparecem em buscas booleanas. Recrutadores buscam 'React Developer | TypeScript | Next.js', não 'Apaixonado por tecnologia'. Coloque suas 3 principais Hard Skills nas primeiras palavras do título.",
+        "[Headline + Skill Graph] Seu título usa termos genéricos sem cobertura do ecossistema técnico. O LinkedIn Recruiter prioriza as primeiras palavras do headline em buscas booleanas. Substitua frases como 'Apaixonado por tecnologia' por 'Desenvolvedora Front-end | React | Next.js | TypeScript'. Isso cobre o grafo de habilidades adjacentes e aparece em filtros estritos.",
       summary:
-        "Seu Sobre não tem hook nas primeiras 2 linhas (o LinkedIn corta ali). Comece com uma métrica de impacto ou proposta de valor direta. Inclua as keywords do cargo-alvo naturalmente no texto para o algoritmo de busca semântica captar.",
+        "[CHA-Atitude + NER] Seu Sobre não tem hook nas primeiras 2 linhas (o LinkedIn corta ali no 'ver mais'). A análise de sentimento indica tom neutro — falta demonstrar atitude e proposta de valor. Comece com uma métrica de impacto, inclua keywords do cargo-alvo naturalmente e termine com um CTA. O ATS e o Recruiter fazem parsing desta seção buscando entidades de competência.",
       experience:
-        "Suas experiências descrevem responsabilidades, não resultados. O algoritmo 'Find Similar' prioriza progressão clara. Use formato: 'Verbo de ação + métrica + contexto' (Ex: 'Reduzi tempo de deploy em 70% implementando CI/CD com GitHub Actions').",
+        "[CHA-Habilidade + TF-IDF] Suas experiências descrevem responsabilidades (o que você fazia), não resultados (o que você entregou). O modelo CHA exige verbos de ação + métricas quantificáveis. A densidade de termos técnicos (TF-IDF) está abaixo do esperado para o cargo. Use: 'Reduzi tempo de deploy em 70% implementando CI/CD com GitHub Actions para equipe de 12 devs'.",
       tips: [
-        "Ative 'Open to Work' (modo oculto para recrutadores) — isso coloca seu perfil no filtro Spotlight e aumenta visibilidade em até 3x",
-        "Adicione suas top 5 Hard Skills na seção Competências E no título — recrutadores usam filtros booleanos estritos",
-        "Siga as empresas-alvo e interaja com posts delas — o algoritmo prioriza candidatos 'Engaged with Talent Brand'",
-        "Atualize seu perfil semanalmente (mesmo que mínimo) — o filtro 'Active Talent' considera atividade nos últimos 30 dias",
-        "Garanta que localização está correta e marque disponibilidade para recolocação — o filtro de localidade é eliminatório",
+        "[Spotlight] Ative 'Open to Work' (modo oculto para recrutadores) — coloca seu perfil no filtro Spotlight e aumenta visibilidade em até 3x sem que sua empresa atual veja",
+        "[Skill Graph] Suas top 5 Hard Skills devem estar EXPLÍCITAS na seção Competências E no título. O grafo de adjacência ajuda, mas skills diretas sempre vencem em buscas booleanas estritas",
+        "[CHA-Habilidade] Reescreva cada experiência com o formato 'Verbo + Métrica + Contexto'. Ex: 'Liderei migração de monolito para microsserviços, reduzindo deploy de 4h para 12min (+99.9% uptime)'",
+        "[NER/ATS] Garanta que seu currículo PDF tem estrutura limpa sem tabelas complexas, barras de progresso ou colunas — o parsing do ATS quebra e você é eliminado antes de um humano ver",
+        "[Localidade] Atualize sua localização e marque disponibilidade para recolocação — o filtro geográfico do LinkedIn Recruiter é ELIMINATÓRIO para vagas presenciais/híbridas",
       ],
     },
   };
