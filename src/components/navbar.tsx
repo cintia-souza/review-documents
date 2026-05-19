@@ -1,6 +1,5 @@
 import { auth, signOut } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import Image from "next/image";
 import Link from "next/link";
 
 export async function Navbar() {
@@ -90,19 +89,9 @@ export async function Navbar() {
             <div className="flex items-center gap-3">
               {/* Avatar */}
               <div className="relative">
-                {session.user.image ? (
-                  <Image
-                    src={session.user.image}
-                    alt={`Avatar de ${session.user.name ?? "usuário"}`}
-                    width={32}
-                    height={32}
-                    className="h-8 w-8 rounded-full ring-2 ring-white/10 transition-all hover:ring-cyan-500/50"
-                  />
-                ) : (
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-violet-500 text-xs font-bold text-white">
-                    {session.user.name?.charAt(0) ?? "U"}
-                  </div>
-                )}
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-cyan-500 to-violet-500 text-xs font-bold text-white">
+                  {session.user.name?.charAt(0) ?? "U"}
+                </div>
                 <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-zinc-950 bg-emerald-400" />
               </div>
 
