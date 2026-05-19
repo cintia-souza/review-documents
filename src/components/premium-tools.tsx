@@ -8,7 +8,7 @@ interface PremiumToolsProps {
   userName: string | null;
 }
 
-type Tab = "rewrite" | "about" | "calendar" | "tips";
+type Tab = "rewrite" | "about" | "beginner" | "calendar" | "tips";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function PremiumTools(_props: PremiumToolsProps) {
@@ -20,6 +20,7 @@ export function PremiumTools(_props: PremiumToolsProps) {
   const tabs: { key: Tab; label: string; icon: string }[] = [
     { key: "rewrite", label: "Perfil Otimizado", icon: "🚀" },
     { key: "about", label: "Reescrita IA", icon: "✍️" },
+    { key: "beginner", label: "Guia Iniciante", icon: "🌱" },
     { key: "calendar", label: "Calendário Editorial", icon: "📅" },
     { key: "tips", label: "Dicas Avançadas", icon: "🎯" },
   ];
@@ -65,8 +66,9 @@ export function PremiumTools(_props: PremiumToolsProps) {
           htmlFor="context-input"
           className="mb-2 block text-sm font-medium text-zinc-300"
         >
-          {activeTab === "rewrite" && "Cole seu perfil atual (headline + sobre + experiências) ou o texto do currículo:"}
-          {activeTab === "about" && "Cole seu texto atual do 'Sobre' ou descreva sua área de atuação:"}
+          {activeTab === "rewrite" && "Cole seu perfil atual, URL do LinkedIn ou texto do currículo:"}
+          {activeTab === "about" && "Cole seu texto do 'Sobre', URL do LinkedIn ou descreva sua área:"}
+          {activeTab === "beginner" && "Descreva sua área de atuação, cargo desejado e principais habilidades:"}
           {activeTab === "calendar" && "Descreva seu nicho, público-alvo e temas de interesse:"}
           {activeTab === "tips" && "Cole a URL do seu perfil ou descreva seu posicionamento atual:"}
         </label>
@@ -77,12 +79,14 @@ export function PremiumTools(_props: PremiumToolsProps) {
           rows={4}
           placeholder={
             activeTab === "rewrite"
-              ? "Cole aqui seu headline, texto do Sobre e descrições de experiência atuais. Quanto mais contexto, melhor a reescrita..."
+              ? "Cole aqui seu headline + sobre + experiências OU a URL do LinkedIn (ex: https://linkedin.com/in/seu-perfil)"
               : activeTab === "about"
-                ? "Ex: Sou desenvolvedor full-stack com 5 anos de experiência em React e Node.js..."
-                : activeTab === "calendar"
-                  ? "Ex: Atuo com marketing digital para startups B2B SaaS..."
-                  : "Ex: https://linkedin.com/in/meu-perfil ou descreva seu posicionamento..."
+                ? "Cole seu texto do Sobre atual OU a URL do LinkedIn (ex: https://linkedin.com/in/seu-perfil)"
+                : activeTab === "beginner"
+                  ? "Ex: Sou recém-formado em Ciência da Computação, quero atuar como dev front-end, sei React, TypeScript e CSS..."
+                  : activeTab === "calendar"
+                    ? "Ex: Atuo com marketing digital para startups B2B SaaS..."
+                    : "Ex: https://linkedin.com/in/meu-perfil ou descreva seu posicionamento..."
           }
           className="w-full resize-none rounded-xl border border-white/10 bg-zinc-800/50 px-4 py-3 text-sm text-white placeholder-zinc-500 outline-none transition-all focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30"
         />
@@ -101,6 +105,7 @@ export function PremiumTools(_props: PremiumToolsProps) {
             <>
               {activeTab === "rewrite" && "✨ Gerar Perfil Otimizado"}
               {activeTab === "about" && "✨ Gerar Reescrita"}
+              {activeTab === "beginner" && "✨ Gerar Guia Completo"}
               {activeTab === "calendar" && "✨ Gerar Calendário"}
               {activeTab === "tips" && "✨ Gerar Dicas Avançadas"}
             </>
@@ -113,6 +118,7 @@ export function PremiumTools(_props: PremiumToolsProps) {
         <div className="space-y-6 animate-fade-in-up">
           {activeTab === "rewrite" && <RewriteResult content={content} />}
           {activeTab === "about" && <AboutResult content={content} />}
+          {activeTab === "beginner" && <BeginnerResult content={content} />}
           {activeTab === "calendar" && <CalendarResult ideas={content.editorialCalendar} />}
           {activeTab === "tips" && <TipsResult tips={content.advancedTips} />}
         </div>
@@ -266,6 +272,117 @@ function AboutResult({ content }: { content: PremiumContent }) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function BeginnerResult({ content }: { content: PremiumContent }) {
+  const copyAll = () => {
+    const full = [
+      content.optimizedHeadline ? `HEADLINE:\n${content.optimizedHeadline}` : "",
+      content.aboutRewrite ? `\nSOBRE:\n${content.aboutRewrite}` : "",
+      content.experienceRewrites.length > 0
+        ? `\nEXPERIÊNCIAS:\n${content.experienceRewrites.join("\n\n")}`
+        : "",
+    ].filter(Boolean).join("\n");
+    navigator.clipboard.writeText(full);
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Intro */}
+      <div className="rounded-2xl border border-amber-500/20 bg-zinc-900/80 p-6">
+        <div className="mb-4 flex items-center gap-2">
+          <span className="text-lg" aria-hidden="true">🌱</span>
+          <h3 className="font-semibold text-white">Seu Perfil do Zero — Passo a Passo</h3>
+        </div>
+        <p className="text-sm text-zinc-400">
+          Montamos seu perfil completo seguindo as regras do algoritmo do LinkedIn Recruiter.
+          Copie cada seção e cole diretamente no seu perfil.
+        </p>
+      </div>
+
+      {/* Step 1: Headline */}
+      {content.optimizedHeadline && (
+        <div className="rounded-2xl border border-emerald-500/20 bg-zinc-900/80 p-6">
+          <div className="mb-3 flex items-center gap-2">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/20 text-xs font-bold text-emerald-400">1</span>
+            <h3 className="font-semibold text-white">Headline (Título)</h3>
+          </div>
+          <p className="mb-2 text-xs text-zinc-500">
+            Cole no campo "Título" do LinkedIn. Coloque suas skills principais nas primeiras palavras.
+          </p>
+          <div className="rounded-xl bg-zinc-800/50 p-4">
+            <p className="text-sm font-medium text-white">{content.optimizedHeadline}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Step 2: About */}
+      {content.aboutRewrite && (
+        <div className="rounded-2xl border border-cyan-500/20 bg-zinc-900/80 p-6">
+          <div className="mb-3 flex items-center gap-2">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-cyan-500/20 text-xs font-bold text-cyan-400">2</span>
+            <h3 className="font-semibold text-white">Seção Sobre</h3>
+          </div>
+          <p className="mb-2 text-xs text-zinc-500">
+            Cole no campo "Sobre" do LinkedIn. As 2 primeiras linhas são críticas (o LinkedIn corta ali).
+          </p>
+          <div className="rounded-xl bg-zinc-800/50 p-4">
+            <p className="whitespace-pre-wrap text-sm leading-relaxed text-zinc-300">{content.aboutRewrite}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Step 3: Experiences */}
+      {content.experienceRewrites.length > 0 && (
+        <div className="rounded-2xl border border-violet-500/20 bg-zinc-900/80 p-6">
+          <div className="mb-3 flex items-center gap-2">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-violet-500/20 text-xs font-bold text-violet-400">3</span>
+            <h3 className="font-semibold text-white">Experiências</h3>
+          </div>
+          <p className="mb-3 text-xs text-zinc-500">
+            Adicione cada experiência na seção "Experiência" do LinkedIn. Use o formato: Verbo + Métrica + Contexto.
+          </p>
+          <div className="space-y-3">
+            {content.experienceRewrites.map((exp, i) => (
+              <div key={i} className="rounded-xl bg-zinc-800/50 p-4">
+                <p className="text-sm leading-relaxed text-zinc-300">{exp}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Step 4: Checklist */}
+      <div className="rounded-2xl border border-white/10 bg-zinc-900/80 p-6">
+        <div className="mb-3 flex items-center gap-2">
+          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-700 text-xs font-bold text-zinc-300">4</span>
+          <h3 className="font-semibold text-white">Checklist Final</h3>
+        </div>
+        <ul className="space-y-2 text-sm text-zinc-400">
+          <li className="flex items-start gap-2"><span className="text-cyan-400">□</span> Adicione foto profissional (fundo neutro, rosto 60% do frame)</li>
+          <li className="flex items-start gap-2"><span className="text-cyan-400">□</span> Ative "Open to Work" (modo oculto para recrutadores)</li>
+          <li className="flex items-start gap-2"><span className="text-cyan-400">□</span> Adicione 5+ competências técnicas na seção Skills</li>
+          <li className="flex items-start gap-2"><span className="text-cyan-400">□</span> Siga 10+ empresas do seu setor-alvo</li>
+          <li className="flex items-start gap-2"><span className="text-cyan-400">□</span> Conecte-se com 50+ profissionais da sua área</li>
+          <li className="flex items-start gap-2"><span className="text-cyan-400">□</span> Atualize localização e marque disponibilidade para relocação</li>
+          <li className="flex items-start gap-2"><span className="text-cyan-400">□</span> Publique 1 post por semana para ativar "Active Talent"</li>
+        </ul>
+      </div>
+
+      {/* Copy all */}
+      <div className="flex justify-center">
+        <button
+          onClick={copyAll}
+          className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-500 to-violet-500 px-6 py-3 text-sm font-medium text-white shadow-lg shadow-cyan-500/20"
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+          </svg>
+          Copiar Perfil Completo
+        </button>
+      </div>
     </div>
   );
 }

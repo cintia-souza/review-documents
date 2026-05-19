@@ -13,7 +13,7 @@ interface PremiumResponse {
 
 const inputSchema = z.object({
   context: z.string().min(10, "Contexto muito curto").max(5000, "Contexto muito longo"),
-  tab: z.enum(["rewrite", "about", "calendar", "tips"]),
+  tab: z.enum(["rewrite", "about", "beginner", "calendar", "tips"]),
 });
 
 const PROMPTS = {
@@ -49,6 +49,22 @@ Com base no nicho e público-alvo fornecido, gere:
 - advancedTips: array vazio
 Responda APENAS com JSON válido.`,
 
+  beginner: `Você é um mentor de carreira especialista em LinkedIn para INICIANTES que estão montando o perfil do zero.
+Com base na área de atuação, cargo desejado e habilidades fornecidas, CRIE um perfil completo otimizado para o algoritmo do LinkedIn Recruiter.
+
+REGRAS:
+1. HEADLINE: Formato "Cargo Desejado | Skill1 | Skill2 | Skill3". Direto, sem frases motivacionais.
+2. SOBRE: Mesmo sem experiência formal, destaque projetos pessoais, formação, certificações e objetivos. Hook nas 2 primeiras linhas. CTA no final.
+3. EXPERIÊNCIAS: Se não tem experiência formal, use projetos pessoais, freelances, contribuições open source ou estágios. Formato "Verbo + Resultado + Contexto".
+
+Gere JSON com:
+- optimizedHeadline: headline pronto para usar
+- aboutRewrite: texto do Sobre completo (máx 250 palavras)
+- experienceRewrites: array com 2-3 descrições de experiência/projetos
+- editorialCalendar: array vazio
+- advancedTips: array vazio
+Responda APENAS com JSON válido.`,
+
   tips: `Você é um consultor de presença digital no LinkedIn.
 Com base no perfil/posicionamento fornecido, gere:
 - aboutRewrite: string vazia
@@ -60,7 +76,7 @@ Responda APENAS com JSON válido.`,
 
 export async function generatePremiumContent(
   context: string,
-  tab: "rewrite" | "about" | "calendar" | "tips"
+  tab: "rewrite" | "about" | "beginner" | "calendar" | "tips"
 ): Promise<PremiumResponse> {
   try {
     // 1. Auth check
@@ -133,7 +149,7 @@ export async function generatePremiumContent(
   }
 }
 
-function simulatedContent(tab: "rewrite" | "about" | "calendar" | "tips"): PremiumContent {
+function simulatedContent(tab: "rewrite" | "about" | "beginner" | "calendar" | "tips"): PremiumContent {
   if (tab === "rewrite") {
     return {
       optimizedHeadline: "Desenvolvedora Full-Stack | React | Next.js | TypeScript | Node.js",
@@ -143,6 +159,21 @@ function simulatedContent(tab: "rewrite" | "about" | "calendar" | "tips"): Premi
         "Liderei squad de 8 devs na migração de monolito para microsserviços, reduzindo tempo de deploy de 4h para 12min e elevando uptime para 99.9% — impactando 200K usuários ativos.",
         "Arquitetei e implementei pipeline de CI/CD com GitHub Actions que reduziu bugs em produção em 73% e acelerou ciclo de entregas em 2x, resultando em NPS +18 pontos.",
         "Otimizei Core Web Vitals (LCP, FID, CLS) de 3 produtos SaaS, gerando aumento de 40% na taxa de conversão e redução de 25% no bounce rate.",
+      ],
+      editorialCalendar: [],
+      advancedTips: [],
+    };
+  }
+
+  if (tab === "beginner") {
+    return {
+      optimizedHeadline: "Desenvolvedor Front-end Jr | React | TypeScript | CSS | Buscando primeira oportunidade",
+      aboutRewrite:
+        "🚀 Desenvolvedor Front-end em início de carreira com projetos práticos em React e TypeScript.\n\nRecém-formado em Ciência da Computação, dediquei os últimos 12 meses a construir projetos reais que resolvem problemas reais. Meu foco é criar interfaces acessíveis, performantes e com ótima experiência do usuário.\n\n🛠️ Stack: React, Next.js, TypeScript, Tailwind CSS, Git\n\n🌟 O que me diferencia:\n• 3 projetos full-stack publicados no GitHub\n• Contribuições em 2 projetos open source\n• Certificação Meta Front-End Developer\n\n📩 Aberto a oportunidades. Vamos conversar?",
+      experienceRewrites: [
+        "Desenvolvi aplicação SaaS de análise de perfis com Next.js 16, TypeScript e Tailwind CSS, implementando autenticação JWT, integração com API de IA e deploy na Vercel — projeto pessoal com 500+ visitas.",
+        "Contribuí com 12 pull requests aceitos em projeto open source React (2K+ stars), corrigindo bugs de acessibilidade e otimizando performance de renderização em 30%.",
+        "Criei portfólio responsivo com score 98/100 no Lighthouse, utilizando Next.js, animações CSS e SEO otimizado — resultando em 3 convites para entrevistas.",
       ],
       editorialCalendar: [],
       advancedTips: [],
