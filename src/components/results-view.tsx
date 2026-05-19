@@ -8,21 +8,21 @@ interface ResultsViewProps {
 }
 
 function getOverallGrade(score: number): { emoji: string; text: string } {
-  if (score >= 90) return { emoji: "🏆", text: "Perfil Excepcional" };
-  if (score >= 75) return { emoji: "🌟", text: "Perfil Forte" };
-  if (score >= 60) return { emoji: "💪", text: "Bom Potencial" };
-  if (score >= 40) return { emoji: "📈", text: "Em Desenvolvimento" };
-  return { emoji: "🚀", text: "Grande Oportunidade de Melhoria" };
+  if (score >= 90) return { emoji: "🏆", text: "Perfil Top 1% — Recruiter Ready" };
+  if (score >= 75) return { emoji: "🌟", text: "Perfil Forte — Alta Visibilidade" };
+  if (score >= 60) return { emoji: "💪", text: "Bom Potencial — Ajustes Pontuais" };
+  if (score >= 40) return { emoji: "📈", text: "Visibilidade Baixa — Otimização Necessária" };
+  return { emoji: "🚀", text: "Invisível para Recrutadores — Ação Urgente" };
 }
 
 export function ResultsView({ result }: ResultsViewProps) {
   const { scores, feedback } = result;
   const grade = getOverallGrade(scores.overall);
 
-  const cards: { label: string; score: number; feedback: string }[] = [
-    { label: "Título", score: scores.title, feedback: feedback.title },
-    { label: "Resumo", score: scores.summary, feedback: feedback.summary },
-    { label: "Experiência", score: scores.experience, feedback: feedback.experience },
+  const cards: { label: string; score: number; feedback: string; weight: string }[] = [
+    { label: "Headline", score: scores.title, feedback: feedback.title, weight: "35%" },
+    { label: "Sobre", score: scores.summary, feedback: feedback.summary, weight: "25%" },
+    { label: "Experiência", score: scores.experience, feedback: feedback.experience, weight: "40%" },
   ];
 
   return (
@@ -61,12 +61,12 @@ export function ResultsView({ result }: ResultsViewProps) {
           {/* Mini stats */}
           <div className="mt-6 flex items-center justify-center gap-6">
             <div className="text-center">
-              <p className="text-xs text-zinc-500">Título</p>
+              <p className="text-xs text-zinc-500">Headline</p>
               <p className="text-lg font-bold text-white">{scores.title}</p>
             </div>
             <div className="h-8 w-px bg-white/10" aria-hidden="true" />
             <div className="text-center">
-              <p className="text-xs text-zinc-500">Resumo</p>
+              <p className="text-xs text-zinc-500">Sobre</p>
               <p className="text-lg font-bold text-white">{scores.summary}</p>
             </div>
             <div className="h-8 w-px bg-white/10" aria-hidden="true" />
@@ -81,7 +81,7 @@ export function ResultsView({ result }: ResultsViewProps) {
       {/* Score cards grid */}
       <div className="grid gap-4 md:grid-cols-3">
         {cards.map((card, i) => (
-          <ScoreCard key={card.label} {...card} delay={i * 150} />
+          <ScoreCard key={card.label} label={card.label} score={card.score} feedback={card.feedback} weight={card.weight} delay={i * 150} />
         ))}
       </div>
 
@@ -89,16 +89,16 @@ export function ResultsView({ result }: ResultsViewProps) {
       <div className="rounded-3xl border border-white/10 bg-zinc-900/80 p-8 backdrop-blur-sm">
         <div className="mb-6 flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20">
-            <span className="text-lg" role="img" aria-label="Dicas">
-              💡
+            <span className="text-lg" role="img" aria-label="Plano de ação">
+              🎯
             </span>
           </div>
           <div>
             <h3 className="text-lg font-semibold text-white">
-              Plano de Ação
+              Plano de Ação — Algoritmo do Recruiter
             </h3>
             <p className="text-xs text-zinc-500">
-              Siga estas dicas para melhorar seu score
+              Baseado nos 4 pilares do LinkedIn Recruiter
             </p>
           </div>
         </div>

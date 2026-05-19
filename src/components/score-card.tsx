@@ -6,6 +6,7 @@ interface ScoreCardProps {
   label: string;
   score: number;
   feedback: string;
+  weight?: string;
   delay?: number;
 }
 
@@ -22,7 +23,7 @@ function getScoreLabel(score: number): string {
   return "Precisa melhorar";
 }
 
-export function ScoreCard({ label, score, feedback, delay = 0 }: ScoreCardProps) {
+export function ScoreCard({ label, score, feedback, weight, delay = 0 }: ScoreCardProps) {
   const gradient = getScoreColor(score);
   const [animated, setAnimated] = useState(false);
   const [displayScore, setDisplayScore] = useState(0);
@@ -71,7 +72,14 @@ export function ScoreCard({ label, score, feedback, delay = 0 }: ScoreCardProps)
             <h3 className="text-sm font-medium uppercase tracking-wider text-zinc-400">
               {label}
             </h3>
-            <p className="mt-0.5 text-xs text-zinc-600">{getScoreLabel(score)}</p>
+            <div className="mt-0.5 flex items-center gap-2">
+              <p className="text-xs text-zinc-600">{getScoreLabel(score)}</p>
+              {weight && (
+                <span className="rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] text-zinc-500">
+                  Peso: {weight}
+                </span>
+              )}
+            </div>
           </div>
           <span
             className={`bg-gradient-to-r ${gradient} bg-clip-text text-4xl font-black tabular-nums text-transparent`}
