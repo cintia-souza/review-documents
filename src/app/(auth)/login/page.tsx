@@ -176,7 +176,10 @@ export default function LoginPage() {
         </form>
 
         <p className="text-center text-xs text-zinc-600">
-          Ao continuar, você concorda com nossos Termos de Uso.
+          Ao continuar, você concorda com nossos{" "}
+          <Link href="/termos" className="text-zinc-400 underline underline-offset-2 hover:text-white">Termos de Uso</Link>
+          {" "}e{" "}
+          <Link href="/privacidade" className="text-zinc-400 underline underline-offset-2 hover:text-white">Política de Privacidade</Link>.
         </p>
       </div>
     </main>
