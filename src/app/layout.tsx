@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR" className="dark">
+    <html lang="pt-BR" className="dark" data-scroll-behavior="smooth">
       <body className={`${inter.className} min-h-screen antialiased`}>
         {/* Skip to content — acessibilidade para teclado */}
         <a

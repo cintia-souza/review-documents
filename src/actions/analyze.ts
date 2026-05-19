@@ -1,9 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { analyzeWithAI } from "@/lib/ai";
 import { analyzeSchema } from "@/lib/validators";
-import { extractTextFromPDF } from "@/lib/pdf";
 import { auth } from "@/lib/auth";
 import type { AnalysisResult } from "@/types";
 
@@ -53,15 +51,18 @@ export async function analyzeProfile(
     }
     const parsed = result.data;
 
-    let textToAnalyze: string;
+    let analysisResult: { scores: import("@/types").ProfileScores; feedback: import("@/types").ProfileFeedback };
 
     if (parsed.type === "linkedin_url") {
-      textToAnalyze = `Analise o perfil LinkedIn: ${parsed.linkedinUrl}`;
+      const { analyzeWithAI } = await import("@/lib/ai");
+      analysisResult = await analyzeWithAI(`Analise o perfil LinkedIn: ${parsed.linkedinUrl}`);
     } else {
-      textToAnalyze = await extractTextFromPDF(parsed.fileBase64);
+      // Send PDF directly to Gemini in a single call (extract + analyze)
+      const { analyzePDFWithAI } = await import("@/lib/ai");
+      analysisResult = await analyzePDFWithAI(parsed.fileBase64);
     }
 
-    const { scores, feedback } = await analyzeWithAI(textToAnalyze);
+    const { scores, feedback } = analysisResult;
 
     const analysis = await prisma.profileAnalysis.create({
       data: {

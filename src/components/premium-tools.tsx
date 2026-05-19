@@ -47,7 +47,7 @@ export function PremiumTools(_props: PremiumToolsProps) {
             key={key}
             role="tab"
             aria-selected={activeTab === key}
-            onClick={() => setActiveTab(key)}
+            onClick={() => { setActiveTab(key); setContent(null); }}
             className={`flex items-center gap-2 whitespace-nowrap rounded-xl px-5 py-3 text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-cyan-500/50 ${
               activeTab === key
                 ? "bg-gradient-to-r from-cyan-500 to-violet-500 text-white shadow-lg shadow-cyan-500/20"

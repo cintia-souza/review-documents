@@ -20,6 +20,7 @@ export default function LoginPage() {
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
+    const name = formData.get("name") as string | null;
 
     if (mode === "register") {
       const result = await registerUser(formData);
@@ -109,6 +110,7 @@ export default function LoginPage() {
                 required
                 autoComplete="name"
                 placeholder="Seu nome"
+                defaultValue=""
                 className="w-full rounded-xl border border-white/10 bg-zinc-800/50 px-4 py-3 text-sm text-white placeholder-zinc-500 outline-none transition-all focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/30"
               />
             </div>
@@ -125,6 +127,7 @@ export default function LoginPage() {
               required
               autoComplete="email"
               placeholder="seu@email.com"
+              defaultValue=""
               aria-invalid={error ? "true" : undefined}
               className="w-full rounded-xl border border-white/10 bg-zinc-800/50 px-4 py-3 text-sm text-white placeholder-zinc-500 outline-none transition-all focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/30 aria-[invalid=true]:border-rose-500/50"
             />
@@ -142,6 +145,7 @@ export default function LoginPage() {
               minLength={6}
               autoComplete={mode === "login" ? "current-password" : "new-password"}
               placeholder="Mínimo 6 caracteres"
+              defaultValue=""
               aria-describedby="password-hint"
               className="w-full rounded-xl border border-white/10 bg-zinc-800/50 px-4 py-3 text-sm text-white placeholder-zinc-500 outline-none transition-all focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/30"
             />
