@@ -13,9 +13,16 @@ SKILL GRAPH: Habilidades são teia de conexões. "Next.js" implica React, JS, TS
 CHA: C=Formação/certificações. H=Verbos de ação+métricas. A=Tom da escrita/atitude.
 NER+TF-IDF: Parsing em blocos semânticos claros? Densidade de termos técnicos equilibrada?
 
+REGRA CRÍTICA PARA HEADLINE:
+O headline/título deve conter 3-5 palavras-chave que são as MAIS FREQUENTES nas vagas reais do cargo-alvo.
+NÃO use as skills que o candidato "acha" importantes — use as que o MERCADO exige.
+Para descobrir: analise mentalmente o que 90% das vagas do cargo pedem em comum.
+Ex: Se o foco é Front-end, vagas reais pedem React, TypeScript, CI/CD, Testes em 90% dos casos.
+O headline deve refletir EXATAMENTE essas keywords de alta frequência no mercado.
+
 PONTUAÇÃO: title(0-100,peso35%), summary(0-100,peso25%), experience(0-100,peso40%), overall=title*0.35+summary*0.25+experience*0.40
 
-JSON: {"scores":{"title":N,"summary":N,"experience":N,"overall":N},"feedback":{"title":"[Skill Graph/NER] feedback","summary":"[CHA-Atitude] feedback","experience":"[TF-IDF/CHA-Habilidade] feedback","tips":["5 dicas com tags [Skill Graph],[CHA],[NER/ATS],[TF-IDF],[Parsing]"]}}
+JSON: {"scores":{"title":N,"summary":N,"experience":N,"overall":N},"feedback":{"title":"[Skill Graph/NER] feedback sobre headline com base nas keywords mais frequentes do mercado","summary":"[CHA-Atitude] feedback","experience":"[TF-IDF/CHA-Habilidade] feedback","tips":["5 dicas com tags [Skill Graph],[CHA],[NER/ATS],[TF-IDF],[Parsing]"]}}
 
 Responda APENAS JSON válido.`;
 
@@ -28,9 +35,17 @@ PILAR 2 - Spotlights: Open to Work, Active Talent (30 dias), Engaged with Talent
 PILAR 3 - Conexão/Localidade: Filtro de localização ELIMINATÓRIO. 1º e 2º grau ganham boost.
 PILAR 4 - Find Similar: Padrão de carreira (progressão, tempo, faculdade, empresas) = DNA profissional.
 
+REGRA CRÍTICA PARA HEADLINE:
+O headline deve conter 3-5 palavras-chave baseadas nas COMPETÊNCIAS MAIS FREQUENTES nas vagas reais do cargo desejado.
+NÃO recomende skills que o candidato "acha" importantes — recomende as que o MERCADO exige.
+Método: Analise mentalmente o que 90% das vagas do cargo pedem em comum.
+Ex: Se o foco é Front-end, vagas reais pedem React, TypeScript, CI/CD, Testes Unitários em 90% dos casos.
+O headline DEVE refletir essas keywords de alta frequência, não termos genéricos ou poéticos.
+Formato ideal: "Cargo | Skill1 | Skill2 | Skill3" (3-5 keywords do mercado)
+
 PONTUAÇÃO: title(0-100,peso35%), summary(0-100,peso25%), experience(0-100,peso40%), overall=title*0.35+summary*0.25+experience*0.40
 
-JSON: {"scores":{"title":N,"summary":N,"experience":N,"overall":N},"feedback":{"title":"[Pilar 1/4] feedback headline","summary":"[Pilar 1/2] feedback sobre","experience":"[Pilar 3/4] feedback experiências","tips":["5 dicas com tags [Pilar 1],[Pilar 2],[Pilar 3],[Pilar 4],[Headline],[Auditoria]"]}}
+JSON: {"scores":{"title":N,"summary":N,"experience":N,"overall":N},"feedback":{"title":"[Pilar 1/4] feedback headline com sugestão de keywords baseadas na frequência real do mercado","summary":"[Pilar 1/2] feedback sobre","experience":"[Pilar 3/4] feedback experiências","tips":["5 dicas com tags [Pilar 1],[Pilar 2],[Pilar 3],[Pilar 4],[Headline],[Auditoria]"]}}
 
 Responda APENAS JSON válido.`;
 
