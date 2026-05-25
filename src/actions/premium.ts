@@ -127,7 +127,7 @@ export async function generatePremiumContent(
     const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
-      return { success: true, data: simulatedContent(tab) };
+      return { success: false, error: "Serviço de IA indisponível. Configure a GEMINI_API_KEY." };
     }
 
     const response = await fetch(
@@ -152,7 +152,7 @@ export async function generatePremiumContent(
 
     if (!response.ok) {
       if (response.status === 429) {
-        return { success: true, data: simulatedContent(tab) };
+        return { success: false, error: "Limite de requisições atingido. Aguarde 1 minuto e tente novamente." };
       }
       throw new Error(`Gemini API error: ${response.status}`);
     }

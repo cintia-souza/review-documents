@@ -21,7 +21,6 @@ REGRAS CRÍTICAS PARA HEADLINE (3-5 keywords):
 5. Busque as competências COMPLEMENTARES mais pedidas nas vagas do cargo (80-90% pedem).
 6. Cruze com as competências do usuário. Use APENAS as que ele domina.
 7. Formato: "Cargo-alvo | StackPrincipal | Complementar1 | Complementar2 | Complementar3"
-   Ex Front-end: "Desenvolvedora Front-end | React/Next.js | CI/CD | Design Systems | AWS"
 
 PONTUAÇÃO: title(0-100,peso35%), summary(0-100,peso25%), experience(0-100,peso40%), overall=title*0.35+summary*0.25+experience*0.40
 
@@ -46,7 +45,6 @@ REGRAS CRÍTICAS PARA HEADLINE (3-5 keywords):
 5. Busque as competências COMPLEMENTARES mais pedidas nas vagas do cargo (80-90%).
 6. Cruze com skills do usuário. Use APENAS as que ele domina.
 7. Formato: "Cargo-alvo | StackPrincipal | Complementar1 | Complementar2 | Complementar3"
-   Ex Front-end: "Desenvolvedora Front-end | React/Next.js | CI/CD | Design Systems | AWS"
 
 PONTUAÇÃO: title(0-100,peso35%), summary(0-100,peso25%), experience(0-100,peso40%), overall=title*0.35+summary*0.25+experience*0.40
 
@@ -67,7 +65,7 @@ INSTRUÇÃO: Busque vagas reais de "${targetRole}". Identifique competências CO
 
 export async function analyzeWithAI(text: string, targetRole: string, userSkills: string): Promise<AIAnalysisResponse> {
   const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) return simulatedLinkedinAnalysis();
+  if (!apiKey) throw new Error("Serviço de IA indisponível. Configure a GEMINI_API_KEY.");
 
   const context = buildContext(targetRole, userSkills);
   const response = await fetch(
@@ -83,8 +81,8 @@ export async function analyzeWithAI(text: string, targetRole: string, userSkills
   );
 
   if (!response.ok) {
-    if (response.status === 429) return simulatedLinkedinAnalysis();
-    throw new Error(`Gemini API error: ${response.status}`);
+    if (response.status === 429) throw new Error("Limite de requisições atingido. Aguarde 1 minuto e tente novamente.");
+    throw new Error(`Erro na API de IA: ${response.status}`);
   }
 
   const data = (await response.json()) as { candidates: { content: { parts: { text: string }[] } }[] };
@@ -93,7 +91,7 @@ export async function analyzeWithAI(text: string, targetRole: string, userSkills
 
 export async function analyzePDFWithAI(base64: string, targetRole: string, userSkills: string): Promise<AIAnalysisResponse> {
   const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) return simulatedPDFAnalysis();
+  if (!apiKey) throw new Error("Serviço de IA indisponível. Configure a GEMINI_API_KEY.");
 
   const context = buildContext(targetRole, userSkills);
   const response = await fetch(
@@ -115,46 +113,10 @@ export async function analyzePDFWithAI(base64: string, targetRole: string, userS
   );
 
   if (!response.ok) {
-    if (response.status === 429) return simulatedPDFAnalysis();
-    throw new Error(`Gemini API error: ${response.status}`);
+    if (response.status === 429) throw new Error("Limite de requisições atingido. Aguarde 1 minuto e tente novamente.");
+    throw new Error(`Erro na API de IA: ${response.status}`);
   }
 
   const data = (await response.json()) as { candidates: { content: { parts: { text: string }[] } }[] };
   return JSON.parse(data.candidates[0].content.parts[0].text) as AIAnalysisResponse;
-}
-
-function simulatedLinkedinAnalysis(): AIAnalysisResponse {
-  return {
-    scores: { title: 42, summary: 48, experience: 61, overall: 53 },
-    feedback: {
-      title: "[Pilar 1] Seu headline não segue o padrão ideal. Use: 'Cargo-alvo | Stack Principal | Complementar1 | Complementar2'. NÃO repita skills do mesmo ecossistema (React/Next.js/TS = 1 só). Priorize diferenciais complementares como CI/CD, Design Systems, AWS.",
-      summary: "[Pilar 2] Sobre sem hook nas primeiras 2 linhas. Comece com métrica de impacto. Ative 'Open to Work' para Spotlight.",
-      experience: "[Pilar 4] Experiências sem progressão clara. Find Similar prioriza jornadas legíveis. Use: 'Verbo + Métrica + Contexto'.",
-      tips: [
-        "[Headline] Agrupe stack principal (React/Next.js) como 1 item e use os slots restantes para complementares",
-        "[Pilar 2] Ative 'Open to Work' (modo oculto) — 3x mais visibilidade",
-        "[Pilar 1] Skills da seção Competências devem espelhar o headline",
-        "[Pilar 3] Localização correta + disponibilidade para recolocação",
-        "[Pilar 4] Progressão clara nas experiências (Jr → Pleno → Sênior)",
-      ],
-    },
-  };
-}
-
-function simulatedPDFAnalysis(): AIAnalysisResponse {
-  return {
-    scores: { title: 45, summary: 52, experience: 58, overall: 52 },
-    feedback: {
-      title: "[Skill Graph] Headline deve ser: 'Cargo-alvo | Stack agrupada | Complementar1 | Complementar2'. Não repita ecossistema (React/Next.js/TS conta como 1). Priorize diferenciais: CI/CD, Testes, Cloud, Design Systems.",
-      summary: "[CHA-Atitude] Resumo genérico. Comece com métrica de impacto e proposta de valor clara.",
-      experience: "[TF-IDF] Densidade de termos complementares baixa. Experiências descrevem responsabilidades, não resultados. Use: Verbo + Métrica + Contexto.",
-      tips: [
-        "[Skill Graph] Agrupe React/Next.js/TypeScript como 1 item no headline — use slots para CI/CD, AWS, Design Systems",
-        "[NER/ATS] Estrutura limpa no PDF — sem tabelas complexas",
-        "[CHA-Habilidade] Reescreva experiências com 'Verbo + Métrica + Contexto'",
-        "[TF-IDF] Inclua termos complementares que 90% das vagas pedem",
-        "[Parsing] Seções claras: Objetivo, Experiência, Formação, Competências",
-      ],
-    },
-  };
 }
