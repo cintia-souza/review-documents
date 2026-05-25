@@ -20,13 +20,22 @@ const PROMPTS = {
   rewrite: `Você é um especialista em LinkedIn Recruiter, Skill Graph Modeling, Metodologia CHA e NER/TF-IDF.
 Com base no perfil/currículo fornecido, REESCREVA o perfil completo otimizado para o algoritmo do LinkedIn Recruiter.
 
-REGRAS DE REESCRITA:
-1. HEADLINE: Coloque as 3 principais Hard Skills nas primeiras palavras. Use formato "Cargo | Skill1 | Skill2 | Skill3". Sem frases poéticas.
-2. SOBRE: Começe com hook nas 2 primeiras linhas (métrica de impacto ou proposta de valor). Inclua keywords do cargo-alvo naturalmente. Termine com CTA.
-3. EXPERIÊNCIAS: Use formato "Verbo de ação + Métrica quantificável + Contexto". Mostre progressão clara.
+REGRAS DE REESCRITA DO HEADLINE:
+1. O CARGO deve ser EXATAMENTE o cargo-alvo informado pelo usuário. NÃO mude.
+2. NÃO repita skills do mesmo ecossistema. React/Next.js/TypeScript = MESMA stack. Agrupe como "React/Next.js" (1 slot só).
+3. PRIORIZE skills COMPLEMENTARES que diferenciam: CI/CD, Testes, Cloud, Design Systems, Performance, Acessibilidade.
+4. NUNCA inclua skills fora do foco. Se foco é Front-end, NÃO coloque Node.js, Python, Back-end.
+5. Use 3-5 keywords: 1 stack principal agrupada + 2-3 complementares do cruzamento mercado x usuário.
+6. Formato: "Cargo-alvo | Stack/Framework | Complementar1 | Complementar2 | Complementar3"
+
+REGRAS DO SOBRE:
+Começe com hook nas 2 primeiras linhas (métrica de impacto ou proposta de valor). Inclua keywords do cargo-alvo naturalmente. Termine com CTA.
+
+REGRAS DAS EXPERIÊNCIAS:
+Use formato "Verbo de ação + Métrica quantificável + Contexto". Mostre progressão clara.
 
 Gere JSON com:
-- optimizedHeadline: string com o headline otimizado
+- optimizedHeadline: string com o headline otimizado seguindo as regras acima
 - aboutRewrite: texto do Sobre otimizado (máx 300 palavras)
 - experienceRewrites: array com 3-4 descrições de experiência reescritas
 - editorialCalendar: array vazio
@@ -152,7 +161,7 @@ export async function generatePremiumContent(
 function simulatedContent(tab: "rewrite" | "about" | "beginner" | "calendar" | "tips"): PremiumContent {
   if (tab === "rewrite") {
     return {
-      optimizedHeadline: "Desenvolvedora Full-Stack | React | Next.js | TypeScript | Node.js",
+      optimizedHeadline: "Desenvolvedora Front-end | React/Next.js | CI/CD | Design Systems | AWS",
       aboutRewrite:
         "🚀 +20 projetos entregues impactando 500K+ usuários em 5 anos de desenvolvimento.\n\nConecto tecnologia com estratégia de negócio para criar produtos digitais que geram resultado mensurável. Especialista em React/Next.js com foco em performance e experiência do usuário.\n\n📊 Resultados que entrego:\n• Redução de 70% no tempo de deploy via CI/CD\n• Aumento de 40% em conversão com otimização de Core Web Vitals\n• NPS +18 pontos após reestruturação de produto\n\n💡 Stack: React, Next.js, TypeScript, Node.js, PostgreSQL, AWS\n\n📩 Aberta a novas oportunidades. Vamos conversar?",
       experienceRewrites: [
