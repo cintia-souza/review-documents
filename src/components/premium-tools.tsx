@@ -88,15 +88,15 @@ export function PremiumTools(_props: PremiumToolsProps) {
               <label htmlFor="user-skills" className="mb-1 block text-xs text-zinc-400">
                 Suas competências técnicas *
               </label>
-              <input
+              <textarea
                 id="user-skills"
-                type="text"
                 value={skills}
                 onChange={(e) => setSkills(e.target.value)}
-                placeholder="Ex: React, TypeScript, Next.js, Node.js, Docker, CI/CD..."
-                className="w-full rounded-xl border border-white/10 bg-zinc-800/50 px-4 py-2.5 text-sm text-white placeholder-zinc-500 outline-none transition-all focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30"
+                rows={4}
+                placeholder={"Ex:\nNext.js, React, TypeScript, React Native\nCI/CD, Docker, AWS, Vercel\nTailwindCSS, Design Systems, WCAG\nGraphQL, PostgreSQL, Serverless"}
+                className="w-full resize-none rounded-xl border border-white/10 bg-zinc-800/50 px-4 py-2.5 text-sm text-white placeholder-zinc-500 outline-none transition-all focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30"
               />
-              <p className="mt-1 text-[10px] text-zinc-600">A IA vai cruzar suas skills com as mais pedidas nas vagas reais do cargo</p>
+              <p className="mt-1 text-[10px] text-zinc-600">Liste suas tecnologias e competências. A IA vai cruzar com as mais pedidas nas vagas reais do cargo.</p>
             </div>
           </div>
         )}
