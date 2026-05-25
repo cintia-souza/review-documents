@@ -151,7 +151,22 @@ export async function generatePremiumContent(
 
     if (!response.ok) {
       if (response.status === 429) {
-        return { success: false, error: "Limite de requisições atingido. Aguarde 1 minuto e tente novamente." };
+        // Retry after 5 seconds
+        await new Promise((r) => setTimeout(r, 5000));
+        const retry = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ role: "user", parts: [{ text: `${PROMPTS[tab]}\n\nContexto do usuário:\n${parsed.data.context}` }] }],
+              generationConfig: { responseMimeType: "application/json", temperature: 0.8 },
+            }),
+          }
+        );
+        if (!retry.ok) return { success: false, error: "Limite de requisições atingido. Aguarde 1 minuto e tente novamente." };
+        const retryData = (await retry.json()) as { candidates: { content: { parts: { text: string }[] } }[] };
+        return { success: true, data: JSON.parse(retryData.candidates[0].content.parts[0].text) as PremiumContent };
       }
       throw new Error(`Gemini API error: ${response.status}`);
     }
