@@ -15,9 +15,10 @@ export default async function PremiumPage() {
     select: { plan: true, name: true },
   });
 
-  if (user?.plan !== "PREMIUM") {
-    return <PremiumSalesPage />;
-  }
+  // Premium temporarily disabled - all users have access
+  // if (user?.plan !== "PREMIUM") {
+  //   return <PremiumSalesPage />;
+  // }
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
@@ -34,7 +35,7 @@ export default async function PremiumPage() {
           </div>
         </div>
       </header>
-      <PremiumTools userName={user.name} />
+      <PremiumTools userName={user?.name ?? null} />
     </main>
   );
 }

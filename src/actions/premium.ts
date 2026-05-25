@@ -107,15 +107,14 @@ export async function generatePremiumContent(
       return { success: false, error: "Faça login para continuar" };
     }
 
-    // 2. Plan check — only Premium users
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { plan: true },
-    });
-
-    if (user?.plan !== "PREMIUM") {
-      return { success: false, error: "Recurso exclusivo para assinantes Premium" };
-    }
+    // Premium check temporarily disabled - all users have access
+    // const user = await prisma.user.findUnique({
+    //   where: { id: session.user.id },
+    //   select: { plan: true },
+    // });
+    // if (user?.plan !== "PREMIUM") {
+    //   return { success: false, error: "Recurso exclusivo para assinantes Premium" };
+    // }
 
     // 3. Input validation
     const parsed = inputSchema.safeParse({ context, tab });
