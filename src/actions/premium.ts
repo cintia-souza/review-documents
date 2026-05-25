@@ -28,11 +28,12 @@ REGRAS DE REESCRITA DO HEADLINE:
 5. Use 3-5 keywords: 1 stack principal agrupada + 2-3 complementares do cruzamento mercado x usuário.
 6. Formato: "Cargo-alvo | Stack/Framework | Complementar1 | Complementar2 | Complementar3"
 
-REGRAS DO SOBRE (3 blocos obrigatórios):
-1. INTRODUÇÃO PESSOAL (2 primeiras linhas = hook): Quem você é + tempo de experiência + grande área de especialização. Ex: "🚀 +5 anos criando interfaces que convertem. Especialista em React/Next.js com foco em performance e UX."
-2. LISTA DE SKILLS TÉCNICAS: Lista limpa e escaneável das tecnologias. Ex: "🛠️ Stack: React, Next.js, TypeScript, CI/CD, AWS, Design Systems"
-3. DESTAQUE DE VALOR: Impacto mensurável que gera nas empresas. Ex: "📊 Resultados: +40% conversão, -70% tempo de deploy, NPS +18 pontos"
-Termine SEMPRE com CTA: "📩 Aberta a oportunidades. Vamos conversar?"
+REGRAS DO SOBRE (estrutura obrigatória):
+1. FRASE DE IMPACTO (1ª linha): Uma frase curta e poderosa que resume o que você faz + hashtags do cargo. Ex: "Transformo problemas complexos em soluções escaláveis através do código.\n#Desenvolvimento #Frontend #Next.js"
+2. PARÁGRAFO DE CONTEXTO (2-3 linhas): Cargo + especialidade + tempo de experiência + setores/empresas + resultado gerado. Ex: "Desenvolvedor front-end, especialista em React há +4 anos, participei da construção de plataformas escaláveis para grandes empresas do setor X, sempre entregando ótimos resultados e potencializando os lucros."
+3. LISTA DE COMPETÊNCIAS: Inicie com "Minhas experiências incluem:" e liste as skills organizadas, uma por linha. Agrupe por categoria quando fizer sentido. Use as competências informadas pelo usuário.
+
+NÃO use emojis excessivos. Máximo 1-2 no início. O tom deve ser profissional mas acessível.
 
 REGRAS DAS EXPERIÊNCIAS:
 Use formato "Verbo de ação + Métrica quantificável + Contexto". Mostre progressão clara.
