@@ -116,17 +116,17 @@ export function PremiumTools(_props: PremiumToolsProps) {
             </div>
             <div>
               <label htmlFor="impact" className="mb-1 block text-xs text-zinc-400">
-                Principais resultados/impactos que você gerou
+                Projetos relevantes, resultados e impactos gerados
               </label>
-              <input
+              <textarea
                 id="impact"
-                type="text"
                 value={impact}
                 onChange={(e) => setImpact(e.target.value)}
-                placeholder="Ex: Reduzi deploy em 70%, aumentei conversão em 40%, liderei time de 8 devs..."
-                className="w-full rounded-xl border border-white/10 bg-zinc-800/50 px-4 py-2.5 text-sm text-white placeholder-zinc-500 outline-none transition-all focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30"
+                rows={4}
+                placeholder={"Conte sobre seus projetos e resultados. Ex:\n- Construí plataforma SaaS para setor de energia solar com +10K usuários\n- Reduzi tempo de deploy de 4h para 12min com CI/CD\n- Liderei time de 8 devs na migração para microsserviços\n- Aumentei conversão em 40% otimizando Core Web Vitals"}
+                className="w-full resize-none rounded-xl border border-white/10 bg-zinc-800/50 px-4 py-2.5 text-sm text-white placeholder-zinc-500 outline-none transition-all focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30"
               />
-              <p className="mt-1 text-[10px] text-zinc-600">A IA usa esses dados para montar o Sobre com introdução + skills + destaque de valor</p>
+              <p className="mt-1 text-[10px] text-zinc-600">Quanto mais detalhes sobre seus projetos e resultados, mais personalizado será o Sobre gerado</p>
             </div>
           </div>
         )}

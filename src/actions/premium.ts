@@ -28,12 +28,21 @@ REGRAS DE REESCRITA DO HEADLINE:
 5. Use 3-5 keywords: 1 stack principal agrupada + 2-3 complementares do cruzamento mercado x usuário.
 6. Formato: "Cargo-alvo | Stack/Framework | Complementar1 | Complementar2 | Complementar3"
 
-REGRAS DO SOBRE (estrutura obrigatória):
-1. FRASE DE IMPACTO (1ª linha): Uma frase curta e poderosa que resume o que você faz + hashtags do cargo. Ex: "Transformo problemas complexos em soluções escaláveis através do código.\n#Desenvolvimento #Frontend #Next.js"
-2. PARÁGRAFO DE CONTEXTO (2-3 linhas): Cargo + especialidade + tempo de experiência + setores/empresas + resultado gerado. Ex: "Desenvolvedor front-end, especialista em React há +4 anos, participei da construção de plataformas escaláveis para grandes empresas do setor X, sempre entregando ótimos resultados e potencializando os lucros."
-3. LISTA DE COMPETÊNCIAS: Inicie com "Minhas experiências incluem:" e liste as skills organizadas, uma por linha. Agrupe por categoria quando fizer sentido. Use as competências informadas pelo usuário.
+REGRAS DO SOBRE:
+O Sobre deve ser ÚNICO e PERSONALIZADO para cada usuário. NÃO siga um template fixo.
 
-NÃO use emojis excessivos. Máximo 1-2 no início. O tom deve ser profissional mas acessível.
+ESTRUTURA FLEXÍVEL (adapte ao perfil do usuário):
+- PRIMEIRA LINHA: Frase de impacto curta que resume a essência profissional. Pode incluir hashtags relevantes do cargo.
+- PARÁGRAFO DE CONTEXTO: Quem é + especialidade + tempo + setores onde atuou + tipo de resultado que entrega. Deve soar natural, como se a pessoa estivesse se apresentando.
+- LISTA DE COMPETÊNCIAS: Organize as skills do usuário de forma limpa e escaneável. Agrupe por categoria quando fizer sentido (ex: frameworks, infra, metodologias).
+
+DIRETRIZES:
+- Tom profissional mas acessível (não robótico)
+- Use os DADOS REAIS do usuário (experiência, setores, resultados informados)
+- NÃO invente métricas ou resultados que o usuário não informou
+- NÃO use emojis excessivos (máximo 0-2)
+- NÃO copie templates genéricos — cada Sobre deve refletir a história ÚNICA do profissional
+- A lista de skills deve usar as competências REAIS informadas pelo usuário
 
 REGRAS DAS EXPERIÊNCIAS:
 Use formato "Verbo de ação + Métrica quantificável + Contexto". Mostre progressão clara.
