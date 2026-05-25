@@ -28,8 +28,11 @@ REGRAS DE REESCRITA DO HEADLINE:
 5. Use 3-5 keywords: 1 stack principal agrupada + 2-3 complementares do cruzamento mercado x usuário.
 6. Formato: "Cargo-alvo | Stack/Framework | Complementar1 | Complementar2 | Complementar3"
 
-REGRAS DO SOBRE:
-Começe com hook nas 2 primeiras linhas (métrica de impacto ou proposta de valor). Inclua keywords do cargo-alvo naturalmente. Termine com CTA.
+REGRAS DO SOBRE (3 blocos obrigatórios):
+1. INTRODUÇÃO PESSOAL (2 primeiras linhas = hook): Quem você é + tempo de experiência + grande área de especialização. Ex: "🚀 +5 anos criando interfaces que convertem. Especialista em React/Next.js com foco em performance e UX."
+2. LISTA DE SKILLS TÉCNICAS: Lista limpa e escaneável das tecnologias. Ex: "🛠️ Stack: React, Next.js, TypeScript, CI/CD, AWS, Design Systems"
+3. DESTAQUE DE VALOR: Impacto mensurável que gera nas empresas. Ex: "📊 Resultados: +40% conversão, -70% tempo de deploy, NPS +18 pontos"
+Termine SEMPRE com CTA: "📩 Aberta a oportunidades. Vamos conversar?"
 
 REGRAS DAS EXPERIÊNCIAS:
 Use formato "Verbo de ação + Métrica quantificável + Contexto". Mostre progressão clara.

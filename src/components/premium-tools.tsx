@@ -18,6 +18,8 @@ export function PremiumTools(_props: PremiumToolsProps) {
   const [context, setContext] = useState("");
   const [targetRole, setTargetRole] = useState("");
   const [skills, setSkills] = useState("");
+  const [experienceTime, setExperienceTime] = useState("");
+  const [impact, setImpact] = useState("");
 
   const tabs: { key: Tab; label: string; icon: string }[] = [
     { key: "rewrite", label: "Perfil Otimizado", icon: "🚀" },
@@ -30,7 +32,7 @@ export function PremiumTools(_props: PremiumToolsProps) {
   const handleGenerate = () => {
     startTransition(async () => {
       const fullContext = (activeTab === "rewrite" || activeTab === "about")
-        ? `${context}\n\n[CARGO-ALVO: ${targetRole}]\n[COMPETÊNCIAS DO USUÁRIO: ${skills}]`
+        ? `${context}\n\n[CARGO-ALVO: ${targetRole}]\n[TEMPO DE EXPERIÊNCIA: ${experienceTime}]\n[COMPETÊNCIAS: ${skills}]\n[RESULTADOS/IMPACTO: ${impact}]`
         : context;
       const result = await generatePremiumContent(fullContext, activeTab);
       if (result.success && result.data) {
@@ -71,18 +73,33 @@ export function PremiumTools(_props: PremiumToolsProps) {
         {(activeTab === "rewrite" || activeTab === "about") && (
           <div className="mb-4 space-y-3 border-b border-white/5 pb-4">
             <p className="text-xs font-medium uppercase tracking-wider text-cyan-400">Dados para cruzamento com o mercado</p>
-            <div>
-              <label htmlFor="target-role" className="mb-1 block text-xs text-zinc-400">
-                Foco da vaga desejada *
-              </label>
-              <input
-                id="target-role"
-                type="text"
-                value={targetRole}
-                onChange={(e) => setTargetRole(e.target.value)}
-                placeholder="Ex: Front-end, Back-end, DevOps, Full-stack..."
-                className="w-full rounded-xl border border-white/10 bg-zinc-800/50 px-4 py-2.5 text-sm text-white placeholder-zinc-500 outline-none transition-all focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30"
-              />
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label htmlFor="target-role" className="mb-1 block text-xs text-zinc-400">
+                  Foco da vaga desejada *
+                </label>
+                <input
+                  id="target-role"
+                  type="text"
+                  value={targetRole}
+                  onChange={(e) => setTargetRole(e.target.value)}
+                  placeholder="Ex: Front-end, Back-end, DevOps..."
+                  className="w-full rounded-xl border border-white/10 bg-zinc-800/50 px-4 py-2.5 text-sm text-white placeholder-zinc-500 outline-none transition-all focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30"
+                />
+              </div>
+              <div>
+                <label htmlFor="experience-time" className="mb-1 block text-xs text-zinc-400">
+                  Tempo de experiência *
+                </label>
+                <input
+                  id="experience-time"
+                  type="text"
+                  value={experienceTime}
+                  onChange={(e) => setExperienceTime(e.target.value)}
+                  placeholder="Ex: 5 anos, 2 anos, recém-formado..."
+                  className="w-full rounded-xl border border-white/10 bg-zinc-800/50 px-4 py-2.5 text-sm text-white placeholder-zinc-500 outline-none transition-all focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30"
+                />
+              </div>
             </div>
             <div>
               <label htmlFor="user-skills" className="mb-1 block text-xs text-zinc-400">
@@ -92,11 +109,24 @@ export function PremiumTools(_props: PremiumToolsProps) {
                 id="user-skills"
                 value={skills}
                 onChange={(e) => setSkills(e.target.value)}
-                rows={4}
-                placeholder={"Ex:\nNext.js, React, TypeScript, React Native\nCI/CD, Docker, AWS, Vercel\nTailwindCSS, Design Systems, WCAG\nGraphQL, PostgreSQL, Serverless"}
+                rows={3}
+                placeholder={"Ex:\nReact, Next.js, TypeScript, React Native\nCI/CD, Docker, AWS, Vercel\nTailwindCSS, Design Systems, WCAG"}
                 className="w-full resize-none rounded-xl border border-white/10 bg-zinc-800/50 px-4 py-2.5 text-sm text-white placeholder-zinc-500 outline-none transition-all focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30"
               />
-              <p className="mt-1 text-[10px] text-zinc-600">Liste suas tecnologias e competências. A IA vai cruzar com as mais pedidas nas vagas reais do cargo.</p>
+            </div>
+            <div>
+              <label htmlFor="impact" className="mb-1 block text-xs text-zinc-400">
+                Principais resultados/impactos que você gerou
+              </label>
+              <input
+                id="impact"
+                type="text"
+                value={impact}
+                onChange={(e) => setImpact(e.target.value)}
+                placeholder="Ex: Reduzi deploy em 70%, aumentei conversão em 40%, liderei time de 8 devs..."
+                className="w-full rounded-xl border border-white/10 bg-zinc-800/50 px-4 py-2.5 text-sm text-white placeholder-zinc-500 outline-none transition-all focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30"
+              />
+              <p className="mt-1 text-[10px] text-zinc-600">A IA usa esses dados para montar o Sobre com introdução + skills + destaque de valor</p>
             </div>
           </div>
         )}
@@ -131,7 +161,7 @@ export function PremiumTools(_props: PremiumToolsProps) {
         />
         <button
           onClick={handleGenerate}
-          disabled={isPending || !context.trim() || ((activeTab === "rewrite" || activeTab === "about") && (!targetRole.trim() || !skills.trim()))}
+          disabled={isPending || !context.trim() || ((activeTab === "rewrite" || activeTab === "about") && (!targetRole.trim() || !skills.trim() || !experienceTime.trim()))}
           aria-busy={isPending}
           className="mt-4 w-full rounded-xl bg-gradient-to-r from-cyan-500 to-violet-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-cyan-500/20 transition-all hover:shadow-cyan-500/30 disabled:opacity-50 disabled:shadow-none"
         >
