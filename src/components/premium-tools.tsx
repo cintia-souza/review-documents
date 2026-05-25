@@ -16,6 +16,7 @@ export function PremiumTools(_props: PremiumToolsProps) {
   const [content, setContent] = useState<PremiumContent | null>(null);
   const [isPending, startTransition] = useTransition();
   const [context, setContext] = useState("");
+  const [error, setError] = useState("");
   const [targetRole, setTargetRole] = useState("");
   const [skills, setSkills] = useState("");
   const [experienceTime, setExperienceTime] = useState("");
@@ -30,6 +31,8 @@ export function PremiumTools(_props: PremiumToolsProps) {
   ];
 
   const handleGenerate = () => {
+    setError("");
+    setContent(null);
     startTransition(async () => {
       const fullContext = (activeTab === "rewrite" || activeTab === "about")
         ? `${context}\n\n[CARGO-ALVO: ${targetRole}]\n[TEMPO DE EXPERIÊNCIA: ${experienceTime}]\n[COMPETÊNCIAS: ${skills}]\n[RESULTADOS/IMPACTO: ${impact}]`
@@ -37,6 +40,8 @@ export function PremiumTools(_props: PremiumToolsProps) {
       const result = await generatePremiumContent(fullContext, activeTab);
       if (result.success && result.data) {
         setContent(result.data);
+      } else {
+        setError(result.error ?? "Erro ao gerar conteúdo. Tente novamente.");
       }
     });
   };
@@ -181,6 +186,13 @@ export function PremiumTools(_props: PremiumToolsProps) {
           )}
         </button>
       </div>
+
+      {/* Error */}
+      {error && (
+        <div role="alert" className="rounded-xl bg-rose-500/10 px-4 py-3 text-center text-sm text-rose-400">
+          {error}
+        </div>
+      )}
 
       {/* Results */}
       {content && (
