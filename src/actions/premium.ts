@@ -12,7 +12,7 @@ interface PremiumResponse {
 }
 
 const inputSchema = z.object({
-  context: z.string().min(10, "Contexto muito curto").max(5000, "Contexto muito longo"),
+  context: z.string().min(1, "Preencha o campo de contexto").max(10000, "Contexto muito longo"),
   tab: z.enum(["rewrite", "about", "beginner", "calendar", "tips"]),
 });
 
