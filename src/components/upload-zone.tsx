@@ -13,6 +13,8 @@ export function UploadZone({ onSubmit, isLoading }: UploadZoneProps) {
   const [fileName, setFileName] = useState("");
   const [isDragging, setIsDragging] = useState(false);
   const [fileBase64, setFileBase64] = useState("");
+  const [targetRole, setTargetRole] = useState("");
+  const [skills, setSkills] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = useCallback((file: File) => {
@@ -36,10 +38,13 @@ export function UploadZone({ onSubmit, isLoading }: UploadZoneProps) {
       fd.set("fileBase64", fileBase64);
       fd.set("fileName", fileName);
     }
+    fd.set("targetRole", targetRole);
+    fd.set("skills", skills);
     onSubmit(fd);
   };
 
-  const canSubmit = mode === "url" ? urlValue.length > 0 : fileBase64.length > 0;
+  const hasInput = mode === "url" ? urlValue.length > 0 : fileBase64.length > 0;
+  const canSubmit = hasInput && targetRole.length > 0 && skills.length > 0;
 
   return (
     <div className="mx-auto w-full max-w-2xl space-y-6">
@@ -205,6 +210,38 @@ export function UploadZone({ onSubmit, isLoading }: UploadZoneProps) {
             />
           </div>
         )}
+      </div>
+
+      {/* Dados do cargo-alvo */}
+      <div className="space-y-3 rounded-2xl border border-white/10 bg-zinc-900/80 p-5 backdrop-blur-sm">
+        <p className="text-xs font-medium uppercase tracking-wider text-zinc-500">Dados para análise precisa</p>
+        <div>
+          <label htmlFor="target-role" className="mb-1.5 block text-sm text-zinc-300">
+            Foco da vaga desejada
+          </label>
+          <input
+            id="target-role"
+            type="text"
+            value={targetRole}
+            onChange={(e) => setTargetRole(e.target.value)}
+            placeholder="Ex: Front-end, Back-end, DevOps, Full-stack, Data Engineer..."
+            className="w-full rounded-xl border border-white/10 bg-zinc-800/50 px-4 py-3 text-sm text-white placeholder-zinc-500 outline-none transition-all focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30"
+          />
+        </div>
+        <div>
+          <label htmlFor="skills" className="mb-1.5 block text-sm text-zinc-300">
+            Suas competências técnicas
+          </label>
+          <input
+            id="skills"
+            type="text"
+            value={skills}
+            onChange={(e) => setSkills(e.target.value)}
+            placeholder="Ex: React, TypeScript, Next.js, Node.js, Docker, CI/CD..."
+            className="w-full rounded-xl border border-white/10 bg-zinc-800/50 px-4 py-3 text-sm text-white placeholder-zinc-500 outline-none transition-all focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30"
+          />
+          <p className="mt-1 text-xs text-zinc-600">Separe por vírgula as tecnologias que você domina</p>
+        </div>
       </div>
 
       {/* Submit button */}

@@ -38,6 +38,8 @@ export async function analyzeProfile(
     const linkedinUrl = getField(formData, "linkedinUrl");
     const fileBase64 = getField(formData, "fileBase64");
     const fileName = getField(formData, "fileName");
+    const targetRole = getField(formData, "targetRole") ?? "";
+    const userSkills = getField(formData, "skills") ?? "";
 
     const payload: Record<string, string> = {};
     if (type) payload.type = type;
@@ -55,11 +57,10 @@ export async function analyzeProfile(
 
     if (parsed.type === "linkedin_url") {
       const { analyzeWithAI } = await import("@/lib/ai");
-      analysisResult = await analyzeWithAI(`Analise o perfil LinkedIn: ${parsed.linkedinUrl}`);
+      analysisResult = await analyzeWithAI(`Analise o perfil LinkedIn: ${parsed.linkedinUrl}`, targetRole, userSkills);
     } else {
-      // Send PDF directly to Gemini in a single call (extract + analyze)
       const { analyzePDFWithAI } = await import("@/lib/ai");
-      analysisResult = await analyzePDFWithAI(parsed.fileBase64);
+      analysisResult = await analyzePDFWithAI(parsed.fileBase64, targetRole, userSkills);
     }
 
     const { scores, feedback } = analysisResult;
