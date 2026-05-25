@@ -38,8 +38,6 @@ export async function analyzeProfile(
     const linkedinUrl = getField(formData, "linkedinUrl");
     const fileBase64 = getField(formData, "fileBase64");
     const fileName = getField(formData, "fileName");
-    const targetRole = getField(formData, "targetRole") ?? "";
-    const userSkills = getField(formData, "skills") ?? "";
 
     const payload: Record<string, string> = {};
     if (type) payload.type = type;
@@ -57,10 +55,10 @@ export async function analyzeProfile(
 
     if (parsed.type === "linkedin_url") {
       const { analyzeWithAI } = await import("@/lib/ai");
-      analysisResult = await analyzeWithAI(`Analise o perfil LinkedIn: ${parsed.linkedinUrl}`, targetRole, userSkills);
+      analysisResult = await analyzeWithAI(`Analise o perfil LinkedIn: ${parsed.linkedinUrl}`, "", "");
     } else {
       const { analyzePDFWithAI } = await import("@/lib/ai");
-      analysisResult = await analyzePDFWithAI(parsed.fileBase64, targetRole, userSkills);
+      analysisResult = await analyzePDFWithAI(parsed.fileBase64, "", "");
     }
 
     const { scores, feedback } = analysisResult;

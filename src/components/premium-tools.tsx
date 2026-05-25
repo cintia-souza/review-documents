@@ -12,10 +12,12 @@ type Tab = "rewrite" | "about" | "beginner" | "calendar" | "tips";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function PremiumTools(_props: PremiumToolsProps) {
-  const [activeTab, setActiveTab] = useState<Tab>("about");
+  const [activeTab, setActiveTab] = useState<Tab>("rewrite");
   const [content, setContent] = useState<PremiumContent | null>(null);
   const [isPending, startTransition] = useTransition();
   const [context, setContext] = useState("");
+  const [targetRole, setTargetRole] = useState("");
+  const [skills, setSkills] = useState("");
 
   const tabs: { key: Tab; label: string; icon: string }[] = [
     { key: "rewrite", label: "Perfil Otimizado", icon: "🚀" },
@@ -27,7 +29,10 @@ export function PremiumTools(_props: PremiumToolsProps) {
 
   const handleGenerate = () => {
     startTransition(async () => {
-      const result = await generatePremiumContent(context, activeTab);
+      const fullContext = (activeTab === "rewrite" || activeTab === "about")
+        ? `${context}\n\n[CARGO-ALVO: ${targetRole}]\n[COMPETÊNCIAS DO USUÁRIO: ${skills}]`
+        : context;
+      const result = await generatePremiumContent(fullContext, activeTab);
       if (result.success && result.data) {
         setContent(result.data);
       }
@@ -62,6 +67,40 @@ export function PremiumTools(_props: PremiumToolsProps) {
 
       {/* Context input */}
       <div className="rounded-2xl border border-white/10 bg-zinc-900/80 p-6 backdrop-blur-sm">
+        {/* Campos de cargo e skills para rewrite/about */}
+        {(activeTab === "rewrite" || activeTab === "about") && (
+          <div className="mb-4 space-y-3 border-b border-white/5 pb-4">
+            <p className="text-xs font-medium uppercase tracking-wider text-cyan-400">Dados para cruzamento com o mercado</p>
+            <div>
+              <label htmlFor="target-role" className="mb-1 block text-xs text-zinc-400">
+                Foco da vaga desejada *
+              </label>
+              <input
+                id="target-role"
+                type="text"
+                value={targetRole}
+                onChange={(e) => setTargetRole(e.target.value)}
+                placeholder="Ex: Front-end, Back-end, DevOps, Full-stack..."
+                className="w-full rounded-xl border border-white/10 bg-zinc-800/50 px-4 py-2.5 text-sm text-white placeholder-zinc-500 outline-none transition-all focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30"
+              />
+            </div>
+            <div>
+              <label htmlFor="user-skills" className="mb-1 block text-xs text-zinc-400">
+                Suas competências técnicas *
+              </label>
+              <input
+                id="user-skills"
+                type="text"
+                value={skills}
+                onChange={(e) => setSkills(e.target.value)}
+                placeholder="Ex: React, TypeScript, Next.js, Node.js, Docker, CI/CD..."
+                className="w-full rounded-xl border border-white/10 bg-zinc-800/50 px-4 py-2.5 text-sm text-white placeholder-zinc-500 outline-none transition-all focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/30"
+              />
+              <p className="mt-1 text-[10px] text-zinc-600">A IA vai cruzar suas skills com as mais pedidas nas vagas reais do cargo</p>
+            </div>
+          </div>
+        )}
+
         <label
           htmlFor="context-input"
           className="mb-2 block text-sm font-medium text-zinc-300"
@@ -92,7 +131,7 @@ export function PremiumTools(_props: PremiumToolsProps) {
         />
         <button
           onClick={handleGenerate}
-          disabled={isPending || !context.trim()}
+          disabled={isPending || !context.trim() || ((activeTab === "rewrite" || activeTab === "about") && (!targetRole.trim() || !skills.trim()))}
           aria-busy={isPending}
           className="mt-4 w-full rounded-xl bg-gradient-to-r from-cyan-500 to-violet-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-cyan-500/20 transition-all hover:shadow-cyan-500/30 disabled:opacity-50 disabled:shadow-none"
         >
