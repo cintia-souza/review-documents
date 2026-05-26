@@ -63,18 +63,31 @@ DADOS DO USUÁRIO:
 INSTRUÇÃO: Busque vagas reais de "${targetRole}". Identifique competências COMPLEMENTARES mais pedidas (não a stack principal, que é óbvia). Cruze com as do usuário. Headline = cargo-alvo + stack agrupada + 2-3 complementares que ele domina.`;
 }
 
+async function getMarketContext(targetRole: string): Promise<string> {
+  try {
+    const { getLatestMarketAnalysis, formatMarketContext } = await import("@/lib/linkedin/market");
+    // Mapeia cargo-alvo para searchTag
+    const tag = targetRole.toLowerCase().includes("front") ? "front-end" :
+                targetRole.toLowerCase().includes("back") ? "back-end" : "front-end";
+    const analysis = await getLatestMarketAnalysis(tag);
+    if (analysis) return formatMarketContext(analysis);
+  } catch {}
+  return "";
+}
+
 export async function analyzeWithAI(text: string, targetRole: string, userSkills: string): Promise<AIAnalysisResponse> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error("Serviço de IA indisponível. Configure a GEMINI_API_KEY.");
 
   const context = buildContext(targetRole, userSkills);
+  const marketContext = await getMarketContext(targetRole);
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        contents: [{ role: "user", parts: [{ text: `${LINKEDIN_PROMPT}${context}\n\nPERFIL LINKEDIN:\n${text}` }] }],
+        contents: [{ role: "user", parts: [{ text: `${LINKEDIN_PROMPT}${context}${marketContext}\n\nPERFIL LINKEDIN:\n${text}` }] }],
         generationConfig: { responseMimeType: "application/json", temperature: 0.7 },
       }),
     }
@@ -94,6 +107,7 @@ export async function analyzePDFWithAI(base64: string, targetRole: string, userS
   if (!apiKey) throw new Error("Serviço de IA indisponível. Configure a GEMINI_API_KEY.");
 
   const context = buildContext(targetRole, userSkills);
+  const marketContext = await getMarketContext(targetRole);
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
     {
@@ -104,7 +118,7 @@ export async function analyzePDFWithAI(base64: string, targetRole: string, userS
           role: "user",
           parts: [
             { inlineData: { mimeType: "application/pdf", data: base64 } },
-            { text: `${PDF_PROMPT}${context}\n\nAnalise o currículo neste PDF.` },
+            { text: `${PDF_PROMPT}${context}${marketContext}\n\nAnalise o currículo neste PDF.` },
           ],
         }],
         generationConfig: { responseMimeType: "application/json", temperature: 0.7 },

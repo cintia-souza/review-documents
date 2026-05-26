@@ -63,3 +63,15 @@ model SavedSuggestion {
   @@index([userId])
   @@map("saved_suggestions")
 }
+
+model MarketAnalysis {
+  id            String   @id @default(cuid())
+  searchTag     String   // "front-end", "back-end", etc.
+  totalScraped  Int      // Total de vagas encontradas na busca
+  totalAnalyzed Int      // Total com descrição analisada
+  skills        Json     // [{ skill, count, percentage }]
+  createdAt     DateTime @default(now())
+
+  @@index([searchTag, createdAt(sort: Desc)])
+  @@map("market_analyses")
+}
