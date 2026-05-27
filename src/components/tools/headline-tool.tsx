@@ -26,8 +26,6 @@ export function HeadlineTool() {
     setMarketSkills([]);
 
     startTransition(async () => {
-      const userSkillsLower = skills.toLowerCase();
-
       const context = [
         `[CARGO-ALVO: ${targetRole}]`,
         `[SENIORIDADE: ${seniority}]`,
@@ -36,24 +34,34 @@ export function HeadlineTool() {
         "TAREFA (análise NOVA e FRESCA — ignore qualquer dado anterior):",
         `1. Analise as vagas REAIS de "${targetRole}" nível "${seniority}" no mercado brasileiro ATUAL.`,
         "2. Liste as 15 competências técnicas mais pedidas. Para cada uma, estime a % de vagas que pedem (0-100).",
-        "3. Gere um headline otimizado cruzando as competências do mercado com as do usuário.",
+        "3. Para cada competência do mercado, INTERPRETE SEMANTICAMENTE se o usuário domina ou não.",
+        "   REGRAS DE INTERPRETAÇÃO:",
+        "   - 'React' e 'React.js' e 'ReactJS' = MESMA coisa",
+        "   - 'Testes Unitários' = Jest, Vitest, Testing Library (se usuário tem qualquer um, marca como true)",
+        "   - 'CI/CD' = GitHub Actions, Jenkins, GitLab CI (qualquer ferramenta de CI conta)",
+        "   - 'Cloud' = AWS, Azure, GCP (qualquer provider conta)",
+        "   - 'Design System' = Storybook, Componentes Reutilizáveis (conceito, não ferramenta específica)",
+        "   - 'Gerenciamento de Estado' = Redux, Zustand, Context API, MobX (qualquer um conta)",
+        "   - 'Estilização' = Tailwind, Styled-components, SASS, CSS Modules (qualquer um conta)",
+        "   - Se o usuário tem uma skill ADJACENTE ou EQUIVALENTE, marque userHas como true",
+        "4. Gere um headline otimizado cruzando as competências do mercado com as do usuário.",
         "",
         "Responda com JSON:",
-        '{"optimizedHeadline":"headline","aboutRewrite":"","experienceRewrites":[],"editorialCalendar":[],"advancedTips":[],"marketSkills":[{"skill":"nome","percentage":90}]}',
+        '{"optimizedHeadline":"headline","aboutRewrite":"","experienceRewrites":[],"editorialCalendar":[],"advancedTips":[],"marketSkills":[{"skill":"nome","percentage":90,"userHas":true}]}',
       ].join("\n");
 
       const res = await generatePremiumContent(context, "rewrite");
       if (res.success && res.data) {
         setHeadline(res.data.optimizedHeadline ?? "");
 
-        const data = res.data as PremiumContent & { marketSkills?: { skill: string; percentage: number }[] };
+        const data = res.data as PremiumContent & { marketSkills?: { skill: string; percentage: number; userHas?: boolean }[] };
         if (data.marketSkills && Array.isArray(data.marketSkills)) {
           const parsed: MarketSkill[] = data.marketSkills
             .filter((s) => s.skill && s.percentage)
             .map((s) => ({
               skill: s.skill,
               percentage: s.percentage,
-              userHas: userSkillsLower.includes(s.skill.toLowerCase()),
+              userHas: s.userHas ?? false,
             }))
             .sort((a, b) => b.percentage - a.percentage);
           setMarketSkills(parsed);
