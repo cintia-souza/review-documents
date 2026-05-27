@@ -67,6 +67,12 @@ async function callGroq(messages: { role: string; content: string }[]): Promise<
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) throw new Error("Serviço de IA indisponível. Configure a GROQ_API_KEY.");
 
+  const systemMsg = messages.find((m) => m.role === "system");
+  const userMsg = messages.find((m) => m.role === "user");
+
+  // Add instruction to never use cached/previous data
+  const freshInstruction = "\n\nIMPORTANTE: Esta é uma análise NOVA e INDEPENDENTE. NÃO use informações de análises anteriores. Baseie-se EXCLUSIVAMENTE nos dados fornecidos AGORA nesta mensagem.";
+
   const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -75,7 +81,10 @@ async function callGroq(messages: { role: string; content: string }[]): Promise<
     },
     body: JSON.stringify({
       model: GROQ_MODEL,
-      messages,
+      messages: [
+        { role: "system", content: (systemMsg?.content ?? "") + freshInstruction },
+        { role: "user", content: userMsg?.content ?? "" },
+      ],
       temperature: 0.7,
       max_tokens: 4000,
       response_format: { type: "json_object" },
@@ -86,7 +95,7 @@ async function callGroq(messages: { role: string; content: string }[]): Promise<
     if (response.status === 429) {
       // Retry after 3 seconds
       await new Promise((r) => setTimeout(r, 3000));
-      const retry = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      const retryResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -94,14 +103,17 @@ async function callGroq(messages: { role: string; content: string }[]): Promise<
         },
         body: JSON.stringify({
           model: GROQ_MODEL,
-          messages,
+          messages: [
+            { role: "system", content: (systemMsg?.content ?? "") + freshInstruction },
+            { role: "user", content: userMsg?.content ?? "" },
+          ],
           temperature: 0.7,
           max_tokens: 4000,
           response_format: { type: "json_object" },
         }),
       });
-      if (!retry.ok) throw new Error("Limite de requisições. Aguarde alguns segundos e tente novamente.");
-      const retryData = (await retry.json()) as { choices: { message: { content: string } }[] };
+      if (!retryResponse.ok) throw new Error("Limite de requisições. Aguarde alguns segundos e tente novamente.");
+      const retryData = (await retryResponse.json()) as { choices: { message: { content: string } }[] };
       return retryData.choices[0].message.content;
     }
     throw new Error(`Erro na API de IA: ${response.status}`);
