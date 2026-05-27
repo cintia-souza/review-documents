@@ -18,47 +18,25 @@ export function HeadlineTool() {
   const [marketSkills, setMarketSkills] = useState<MarketSkill[]>([]);
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
-  const [dataSource, setDataSource] = useState<"scraper" | "ai" | "">("");
 
   const handleGenerate = () => {
+    // Clean state completely before each new search
     setError("");
     setHeadline("");
     setMarketSkills([]);
-    setDataSource("");
+
     startTransition(async () => {
       const userSkillsLower = skills.toLowerCase();
-      let gotMarketData = false;
 
-      // Step 1: Try real market data from scraper cache
-      try {
-        const tag = targetRole.toLowerCase().replace(/\s+/g, "-");
-        const marketRes = await fetch(`/api/market-skills?tag=${encodeURIComponent(tag)}`);
-        if (marketRes.ok) {
-          const marketData = (await marketRes.json()) as { skills: { skill: string; percentage: number }[] };
-          if (marketData.skills?.length > 0) {
-            const parsed: MarketSkill[] = marketData.skills.slice(0, 15).map((s) => ({
-              skill: s.skill,
-              percentage: s.percentage,
-              userHas: userSkillsLower.includes(s.skill.toLowerCase()),
-            }));
-            setMarketSkills(parsed);
-            setDataSource("scraper");
-            gotMarketData = true;
-          }
-        }
-      } catch {
-        // No cached data
-      }
-
-      // Step 2: Generate headline + market skills via AI
       const context = [
         `[CARGO-ALVO: ${targetRole}]`,
         `[SENIORIDADE: ${seniority}]`,
         `[COMPETÊNCIAS DO USUÁRIO: ${skills}]`,
         "",
-        "TAREFA DUPLA:",
-        `1. Liste as 15 competências técnicas mais pedidas nas vagas de "${targetRole}" nível "${seniority}" no mercado brasileiro. Para cada uma, estime a % de vagas que pedem (0-100).`,
-        "2. Gere um headline otimizado seguindo as regras.",
+        "TAREFA (análise NOVA e FRESCA — ignore qualquer dado anterior):",
+        `1. Analise as vagas REAIS de "${targetRole}" nível "${seniority}" no mercado brasileiro ATUAL.`,
+        "2. Liste as 15 competências técnicas mais pedidas. Para cada uma, estime a % de vagas que pedem (0-100).",
+        "3. Gere um headline otimizado cruzando as competências do mercado com as do usuário.",
         "",
         "Responda com JSON:",
         '{"optimizedHeadline":"headline","aboutRewrite":"","experienceRewrites":[],"editorialCalendar":[],"advancedTips":[],"marketSkills":[{"skill":"nome","percentage":90}]}',
@@ -68,21 +46,17 @@ export function HeadlineTool() {
       if (res.success && res.data) {
         setHeadline(res.data.optimizedHeadline ?? "");
 
-        // Use AI market skills only if scraper didn't provide
-        if (!gotMarketData) {
-          const data = res.data as PremiumContent & { marketSkills?: { skill: string; percentage: number }[] };
-          if (data.marketSkills && Array.isArray(data.marketSkills)) {
-            const parsed: MarketSkill[] = data.marketSkills
-              .filter((s) => s.skill && s.percentage)
-              .map((s) => ({
-                skill: s.skill,
-                percentage: s.percentage,
-                userHas: userSkillsLower.includes(s.skill.toLowerCase()),
-              }))
-              .sort((a, b) => b.percentage - a.percentage);
-            setMarketSkills(parsed);
-            setDataSource("ai");
-          }
+        const data = res.data as PremiumContent & { marketSkills?: { skill: string; percentage: number }[] };
+        if (data.marketSkills && Array.isArray(data.marketSkills)) {
+          const parsed: MarketSkill[] = data.marketSkills
+            .filter((s) => s.skill && s.percentage)
+            .map((s) => ({
+              skill: s.skill,
+              percentage: s.percentage,
+              userHas: userSkillsLower.includes(s.skill.toLowerCase()),
+            }))
+            .sort((a, b) => b.percentage - a.percentage);
+          setMarketSkills(parsed);
         }
       } else {
         setError(res.error ?? "Erro ao analisar mercado");
@@ -176,9 +150,7 @@ export function HeadlineTool() {
                     Competências mais pedidas — {targetRole} ({seniority})
                   </h3>
                   <p className="mt-0.5 text-xs text-zinc-500">
-                    {dataSource === "scraper"
-                      ? "📊 Dados reais do scraper de vagas do LinkedIn"
-                      : "🤖 Estimativa da IA baseada no mercado"}
+                    Análise fresca do mercado atual de vagas
                   </p>
                 </div>
                 <div className="rounded-full bg-cyan-500/10 px-3 py-1 text-xs font-medium text-cyan-400">
@@ -190,26 +162,26 @@ export function HeadlineTool() {
                 {marketSkills.map((s, i) => (
                   <div key={i} className="flex items-center gap-3">
                     <div className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
-                      s.userHas ? "bg-emerald-500/20 text-emerald-400" : "bg-zinc-800 text-zinc-500"
+                      s.userHas ? "bg-emerald-500/20 text-emerald-400" : "bg-rose-500/20 text-rose-400"
                     }`}>
-                      {s.userHas ? "✓" : "×"}
+                      {s.userHas ? "✓" : "!"}
                     </div>
                     <span className={`w-36 shrink-0 text-xs font-medium ${s.userHas ? "text-white" : "text-zinc-400"}`}>
                       {s.skill}
                     </span>
                     <div className="flex-1">
-                      <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-800">
+                      <div className="h-2.5 w-full overflow-hidden rounded-full bg-zinc-800">
                         <div
                           className={`h-full rounded-full transition-all duration-700 ${
                             s.userHas
                               ? "bg-gradient-to-r from-emerald-500 to-cyan-500"
-                              : "bg-gradient-to-r from-zinc-600 to-zinc-500"
+                              : "bg-gradient-to-r from-rose-500/60 to-orange-500/60"
                           }`}
                           style={{ width: `${s.percentage}%` }}
                         />
                       </div>
                     </div>
-                    <span className="w-10 shrink-0 text-right text-xs text-zinc-500">{s.percentage}%</span>
+                    <span className="w-10 shrink-0 text-right text-xs font-medium text-zinc-400">{s.percentage}%</span>
                   </div>
                 ))}
               </div>
@@ -219,7 +191,7 @@ export function HeadlineTool() {
                   <span className="h-2 w-2 rounded-full bg-emerald-500" /> Você domina
                 </span>
                 <span className="flex items-center gap-1">
-                  <span className="h-2 w-2 rounded-full bg-zinc-600" /> GAP — considere aprender
+                  <span className="h-2 w-2 rounded-full bg-rose-500/60" /> GAP — considere aprender
                 </span>
               </div>
             </div>
