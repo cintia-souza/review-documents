@@ -8,6 +8,20 @@ interface PremiumToolsProps {
   userName: string | null;
 }
 
+function normalizeExp(exp: unknown): string {
+  if (typeof exp === "string") return exp;
+  if (typeof exp === "object" && exp !== null) {
+    const obj = exp as Record<string, unknown>;
+    const parts = [];
+    if (obj.cargo) parts.push(String(obj.cargo));
+    if (obj.empresa) parts.push(`em ${String(obj.empresa)}`);
+    if (obj.descricao) parts.push(`— ${String(obj.descricao)}`);
+    if (parts.length > 0) return parts.join(" ");
+    return Object.values(obj).map(String).join(" | ");
+  }
+  return String(exp);
+}
+
 type Tab = "rewrite" | "about" | "beginner" | "calendar" | "tips";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -292,7 +306,7 @@ function RewriteResult({ content }: { content: PremiumContent }) {
           <div className="space-y-3">
             {content.experienceRewrites.map((exp, i) => (
               <div key={i} className="group rounded-xl bg-zinc-800/50 p-4">
-                <p className="text-sm leading-relaxed text-zinc-300">{exp}</p>
+                <p className="text-sm leading-relaxed text-zinc-300">{normalizeExp(exp)}</p>
                 <button
                   onClick={() => copySection(exp)}
                   className="mt-2 flex items-center gap-1 text-[10px] text-zinc-500 opacity-0 transition-opacity group-hover:opacity-100"
@@ -347,7 +361,7 @@ function AboutResult({ content }: { content: PremiumContent }) {
           <div className="space-y-3">
             {content.experienceRewrites.map((exp, i) => (
               <div key={i} className="rounded-xl bg-zinc-800/50 p-4">
-                <p className="text-sm leading-relaxed text-zinc-300">{exp}</p>
+                <p className="text-sm leading-relaxed text-zinc-300">{normalizeExp(exp)}</p>
               </div>
             ))}
           </div>
@@ -428,7 +442,7 @@ function BeginnerResult({ content }: { content: PremiumContent }) {
           <div className="space-y-3">
             {content.experienceRewrites.map((exp, i) => (
               <div key={i} className="rounded-xl bg-zinc-800/50 p-4">
-                <p className="text-sm leading-relaxed text-zinc-300">{exp}</p>
+                <p className="text-sm leading-relaxed text-zinc-300">{normalizeExp(exp)}</p>
               </div>
             ))}
           </div>
