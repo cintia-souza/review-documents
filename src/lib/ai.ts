@@ -140,16 +140,19 @@ async function extractTextFromPDF(base64: string): Promise<string> {
     }
   }
 
-  // Fallback: basic regex extraction
-  const buffer = Buffer.from(base64, "base64");
+  // Fallback: basic regex extraction from PDF stream content
+  const buffer = Buffer.from(base64, "latin1");
   const rawText = buffer.toString("latin1");
-  const matches = rawText.match(/\(([^)]+)\)/g);
-  if (matches && matches.length > 10) {
-    const extracted = matches.map((m) => m.slice(1, -1)).join(" ");
+  const matches = rawText.match(/\(([^)]{2,})\)/g);
+  if (matches && matches.length > 5) {
+    const extracted = matches
+      .map((m) => m.slice(1, -1))
+      .filter((t) => /[a-zA-Zà-ü]{2,}/.test(t))
+      .join(" ");
     if (extracted.length > 100) return extracted.slice(0, 4000);
   }
 
-  throw new Error("Não foi possível extrair texto do PDF. Tente exportar novamente pelo LinkedIn (Perfil → Mais → Salvar como PDF).");
+  throw new Error("Não foi possível extrair texto do PDF. A API do Gemini está com cota esgotada. Aguarde o reset ou ative o billing no Google Cloud para desbloquear.");
 }
 
 export async function analyzeWithAI(text: string, targetRole: string, userSkills: string): Promise<AIAnalysisResponse> {
