@@ -18,47 +18,71 @@ export function HeadlineTool() {
   const [marketSkills, setMarketSkills] = useState<MarketSkill[]>([]);
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
+  const [dataSource, setDataSource] = useState<"scraper" | "ai" | "">("");
 
   const handleGenerate = () => {
     setError("");
     setHeadline("");
     setMarketSkills([]);
+    setDataSource("");
     startTransition(async () => {
-      const context = `[CARGO-ALVO: ${targetRole}]
-[SENIORIDADE: ${seniority}]
-[COMPETÊNCIAS DO USUÁRIO: ${skills}]
+      const userSkillsLower = skills.toLowerCase();
+      let gotMarketData = false;
 
-TAREFA DUPLA:
-1. Liste as 15 competências técnicas mais pedidas nas vagas de "${targetRole}" nível "${seniority}" no mercado brasileiro. Para cada uma, estime a % de vagas que pedem (0-100).
-2. Gere um headline otimizado seguindo as regras.
+      // Step 1: Try real market data from scraper cache
+      try {
+        const tag = targetRole.toLowerCase().replace(/\s+/g, "-");
+        const marketRes = await fetch(`/api/market-skills?tag=${encodeURIComponent(tag)}`);
+        if (marketRes.ok) {
+          const marketData = (await marketRes.json()) as { skills: { skill: string; percentage: number }[] };
+          if (marketData.skills?.length > 0) {
+            const parsed: MarketSkill[] = marketData.skills.slice(0, 15).map((s) => ({
+              skill: s.skill,
+              percentage: s.percentage,
+              userHas: userSkillsLower.includes(s.skill.toLowerCase()),
+            }));
+            setMarketSkills(parsed);
+            setDataSource("scraper");
+            gotMarketData = true;
+          }
+        }
+      } catch {
+        // No cached data
+      }
 
-Responda com JSON:
-{
-  "optimizedHeadline": "headline aqui",
-  "aboutRewrite": "",
-  "experienceRewrites": [],
-  "editorialCalendar": [],
-  "advancedTips": [],
-  "marketSkills": [{"skill": "nome", "percentage": 90}, ...]
-}`;
+      // Step 2: Generate headline + market skills via AI
+      const context = [
+        `[CARGO-ALVO: ${targetRole}]`,
+        `[SENIORIDADE: ${seniority}]`,
+        `[COMPETÊNCIAS DO USUÁRIO: ${skills}]`,
+        "",
+        "TAREFA DUPLA:",
+        `1. Liste as 15 competências técnicas mais pedidas nas vagas de "${targetRole}" nível "${seniority}" no mercado brasileiro. Para cada uma, estime a % de vagas que pedem (0-100).`,
+        "2. Gere um headline otimizado seguindo as regras.",
+        "",
+        "Responda com JSON:",
+        '{"optimizedHeadline":"headline","aboutRewrite":"","experienceRewrites":[],"editorialCalendar":[],"advancedTips":[],"marketSkills":[{"skill":"nome","percentage":90}]}',
+      ].join("\n");
 
       const res = await generatePremiumContent(context, "rewrite");
       if (res.success && res.data) {
         setHeadline(res.data.optimizedHeadline ?? "");
 
-        // Parse market skills from response
-        const data = res.data as PremiumContent & { marketSkills?: { skill: string; percentage: number }[] };
-        if (data.marketSkills && Array.isArray(data.marketSkills)) {
-          const userSkillsLower = skills.toLowerCase();
-          const parsed: MarketSkill[] = data.marketSkills
-            .filter((s) => s.skill && s.percentage)
-            .map((s) => ({
-              skill: s.skill,
-              percentage: s.percentage,
-              userHas: userSkillsLower.includes(s.skill.toLowerCase()),
-            }))
-            .sort((a, b) => b.percentage - a.percentage);
-          setMarketSkills(parsed);
+        // Use AI market skills only if scraper didn't provide
+        if (!gotMarketData) {
+          const data = res.data as PremiumContent & { marketSkills?: { skill: string; percentage: number }[] };
+          if (data.marketSkills && Array.isArray(data.marketSkills)) {
+            const parsed: MarketSkill[] = data.marketSkills
+              .filter((s) => s.skill && s.percentage)
+              .map((s) => ({
+                skill: s.skill,
+                percentage: s.percentage,
+                userHas: userSkillsLower.includes(s.skill.toLowerCase()),
+              }))
+              .sort((a, b) => b.percentage - a.percentage);
+            setMarketSkills(parsed);
+            setDataSource("ai");
+          }
         }
       } else {
         setError(res.error ?? "Erro ao analisar mercado");
@@ -152,7 +176,9 @@ Responda com JSON:
                     Competências mais pedidas — {targetRole} ({seniority})
                   </h3>
                   <p className="mt-0.5 text-xs text-zinc-500">
-                    Baseado na análise de vagas reais do mercado
+                    {dataSource === "scraper"
+                      ? "📊 Dados reais do scraper de vagas do LinkedIn"
+                      : "🤖 Estimativa da IA baseada no mercado"}
                   </p>
                 </div>
                 <div className="rounded-full bg-cyan-500/10 px-3 py-1 text-xs font-medium text-cyan-400">
@@ -163,23 +189,14 @@ Responda com JSON:
               <div className="space-y-2">
                 {marketSkills.map((s, i) => (
                   <div key={i} className="flex items-center gap-3">
-                    {/* Match indicator */}
                     <div className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
-                      s.userHas
-                        ? "bg-emerald-500/20 text-emerald-400"
-                        : "bg-zinc-800 text-zinc-500"
+                      s.userHas ? "bg-emerald-500/20 text-emerald-400" : "bg-zinc-800 text-zinc-500"
                     }`}>
                       {s.userHas ? "✓" : "×"}
                     </div>
-
-                    {/* Skill name */}
-                    <span className={`w-32 shrink-0 text-xs font-medium ${
-                      s.userHas ? "text-white" : "text-zinc-400"
-                    }`}>
+                    <span className={`w-36 shrink-0 text-xs font-medium ${s.userHas ? "text-white" : "text-zinc-400"}`}>
                       {s.skill}
                     </span>
-
-                    {/* Progress bar */}
                     <div className="flex-1">
                       <div className="h-2 w-full overflow-hidden rounded-full bg-zinc-800">
                         <div
@@ -192,16 +209,11 @@ Responda com JSON:
                         />
                       </div>
                     </div>
-
-                    {/* Percentage */}
-                    <span className="w-10 shrink-0 text-right text-xs text-zinc-500">
-                      {s.percentage}%
-                    </span>
+                    <span className="w-10 shrink-0 text-right text-xs text-zinc-500">{s.percentage}%</span>
                   </div>
                 ))}
               </div>
 
-              {/* Legend */}
               <div className="mt-4 flex items-center gap-4 border-t border-white/5 pt-3 text-[10px] text-zinc-500">
                 <span className="flex items-center gap-1">
                   <span className="h-2 w-2 rounded-full bg-emerald-500" /> Você domina
@@ -225,11 +237,9 @@ Responda com JSON:
                   Copiar
                 </button>
               </div>
-              <p className="rounded-xl bg-zinc-800/50 p-4 text-sm font-medium text-white">
-                {headline}
-              </p>
+              <p className="rounded-xl bg-zinc-800/50 p-4 text-sm font-medium text-white">{headline}</p>
               <p className="mt-2 text-xs text-zinc-500">
-                Baseado no cruzamento: competências do mercado × suas skills ({matchCount} matches)
+                Cruzamento: competências do mercado × suas skills ({matchCount} matches)
               </p>
             </div>
           )}
