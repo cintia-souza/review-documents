@@ -11,7 +11,11 @@ const APPLICATION_COMMAND = 2;
 // Discord Response Types
 const PONG = 1;
 const CHANNEL_MESSAGE = 4;
-const DEFERRED_CHANNEL_MESSAGE = 5;
+
+// GET para testar se a rota está ativa
+export async function GET() {
+  return NextResponse.json({ status: 'ok', message: 'Discord bot endpoint ativo' });
+}
 
 export async function POST(request: NextRequest) {
   const body = await request.text();
@@ -19,6 +23,10 @@ export async function POST(request: NextRequest) {
   const timestamp = request.headers.get('x-signature-timestamp') || '';
 
   // Verificação obrigatória do Discord
+  if (!DISCORD_PUBLIC_KEY) {
+    return NextResponse.json({ error: 'DISCORD_PUBLIC_KEY not configured' }, { status: 500 });
+  }
+
   const isValid = await verifyDiscordSignature(body, signature, timestamp, DISCORD_PUBLIC_KEY);
   if (!isValid) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
@@ -37,24 +45,29 @@ export async function POST(request: NextRequest) {
 
     let response;
 
-    switch (name) {
-      case 'vagas': {
-        const tag = options?.[0]?.value || 'front-end';
-        response = await handleVagas(tag);
-        break;
+    try {
+      switch (name) {
+        case 'vagas': {
+          const tag = options?.[0]?.value || 'front-end';
+          response = await handleVagas(tag);
+          break;
+        }
+        case 'analise': {
+          const tag = options?.[0]?.value || 'front-end';
+          response = await handleAnalise(tag);
+          break;
+        }
+        case 'mapa': {
+          const cargo = options?.[0]?.value || 'Frontend React Developer';
+          response = await handleMapa(cargo);
+          break;
+        }
+        default:
+          response = { content: '❓ Comando não reconhecido.' };
       }
-      case 'analise': {
-        const tag = options?.[0]?.value || 'front-end';
-        response = await handleAnalise(tag);
-        break;
-      }
-      case 'mapa': {
-        const cargo = options?.[0]?.value || 'Frontend React Developer';
-        response = await handleMapa(cargo);
-        break;
-      }
-      default:
-        response = { content: '❓ Comando não reconhecido.' };
+    } catch (err) {
+      console.error('[Discord Bot] Erro:', err);
+      response = { content: '❌ Erro interno ao processar comando.' };
     }
 
     return NextResponse.json({
