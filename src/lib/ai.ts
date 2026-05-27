@@ -101,7 +101,7 @@ async function callGroq(systemPrompt: string, userContent: string): Promise<stri
       const retryData = (await retry.json()) as { choices: { message: { content: string } }[] };
       return retryData.choices[0].message.content;
     }
-    throw new Error(`Erro na API de IA: ${response.status}`);
+    throw new Error(`Erro na API de IA: ${response.status} - ${await response.text().catch(() => "")}`);
   }
 
   const data = (await response.json()) as { choices: { message: { content: string } }[] };
@@ -133,7 +133,7 @@ async function extractTextFromPDF(base64: string): Promise<string> {
       if (response.ok) {
         const data = (await response.json()) as { candidates: { content: { parts: { text: string }[] } }[] };
         const text = data.candidates[0].content.parts[0].text;
-        if (text && text.length > 50) return text.slice(0, 8000);
+        if (text && text.length > 50) return text.slice(0, 4000);
       }
     } catch {
       // Gemini failed, try fallback
@@ -146,7 +146,7 @@ async function extractTextFromPDF(base64: string): Promise<string> {
   const matches = rawText.match(/\(([^)]+)\)/g);
   if (matches && matches.length > 10) {
     const extracted = matches.map((m) => m.slice(1, -1)).join(" ");
-    if (extracted.length > 100) return extracted.slice(0, 8000);
+    if (extracted.length > 100) return extracted.slice(0, 4000);
   }
 
   throw new Error("Não foi possível extrair texto do PDF. Tente exportar novamente pelo LinkedIn (Perfil → Mais → Salvar como PDF).");
