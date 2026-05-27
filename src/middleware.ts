@@ -52,7 +52,7 @@ export function middleware(request: NextRequest) {
   }
 
   // Block direct access to internal API routes
-  if (path.startsWith("/api/") && !path.startsWith("/api/auth") && !path.startsWith("/api/webhooks")) {
+  if (path.startsWith("/api/") && !path.startsWith("/api/auth") && !path.startsWith("/api/webhooks") && !path.startsWith("/api/discord") && !path.startsWith("/api/market-skills")) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
