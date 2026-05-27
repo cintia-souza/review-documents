@@ -122,60 +122,52 @@ export async function generatePremiumContent(
       return { success: false, error: parsed.error.issues[0].message };
     }
 
-    // 4. Call AI
-    const apiKey = process.env.GEMINI_API_KEY;
+    // 4. Call AI via Groq
+    const apiKey = process.env.GROQ_API_KEY;
 
     if (!apiKey) {
-      return { success: false, error: "Serviço de IA indisponível. Configure a GEMINI_API_KEY." };
+      return { success: false, error: "Serviço de IA indisponível. Configure a GROQ_API_KEY." };
     }
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: "user",
-              parts: [{ text: `${PROMPTS[tab]}\n\nContexto do usuário:\n${parsed.data.context}` }],
-            },
-          ],
-          generationConfig: {
-            responseMimeType: "application/json",
-            temperature: 0.8,
-          },
-        }),
-      }
-    );
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        messages: [
+          { role: "system", content: PROMPTS[tab] },
+          { role: "user", content: parsed.data.context },
+        ],
+        temperature: 0.8,
+        max_tokens: 4000,
+        response_format: { type: "json_object" },
+      }),
+    });
 
     if (!response.ok) {
       if (response.status === 429) {
-        // Retry after 5 seconds
-        await new Promise((r) => setTimeout(r, 5000));
-        const retry = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [{ role: "user", parts: [{ text: `${PROMPTS[tab]}\n\nContexto do usuário:\n${parsed.data.context}` }] }],
-              generationConfig: { responseMimeType: "application/json", temperature: 0.8 },
-            }),
-          }
-        );
-        if (!retry.ok) return { success: false, error: "Limite de requisições atingido. Aguarde 1 minuto e tente novamente." };
-        const retryData = (await retry.json()) as { candidates: { content: { parts: { text: string }[] } }[] };
-        return { success: true, data: JSON.parse(retryData.candidates[0].content.parts[0].text) as PremiumContent };
+        await new Promise((r) => setTimeout(r, 3000));
+        const retry = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+          body: JSON.stringify({
+            model: "llama-3.3-70b-versatile",
+            messages: [{ role: "system", content: PROMPTS[tab] }, { role: "user", content: parsed.data.context }],
+            temperature: 0.8, max_tokens: 4000, response_format: { type: "json_object" },
+          }),
+        });
+        if (!retry.ok) return { success: false, error: "Limite de requisições. Aguarde alguns segundos e tente novamente." };
+        const retryData = (await retry.json()) as { choices: { message: { content: string } }[] };
+        return { success: true, data: JSON.parse(retryData.choices[0].message.content) as PremiumContent };
       }
-      throw new Error(`Gemini API error: ${response.status}`);
+      throw new Error(`Erro na API de IA: ${response.status}`);
     }
 
-    const data = (await response.json()) as {
-      candidates: { content: { parts: { text: string }[] } }[];
-    };
-
-    const raw = data.candidates[0].content.parts[0].text;
+    const data = (await response.json()) as { choices: { message: { content: string } }[] };
+    const raw = data.choices[0].message.content;
     const result = JSON.parse(raw) as PremiumContent;
 
     return { success: true, data: result };
