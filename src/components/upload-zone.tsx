@@ -70,6 +70,16 @@ export function UploadZone({ onSubmit, isLoading }: UploadZoneProps) {
         ))}
       </div>
 
+      {/* Dica para exportar PDF do LinkedIn */}
+      {mode === "file" && (
+        <div className="rounded-xl border border-cyan-500/10 bg-cyan-500/5 px-4 py-3">
+          <p className="text-xs text-cyan-300">
+            💡 <strong>Dica:</strong> Para melhor resultado, exporte seu perfil do LinkedIn como PDF:
+            LinkedIn → Seu perfil → Botão "Mais" → "Salvar como PDF"
+          </p>
+        </div>
+      )}
+
       {/* Input panels */}
       <div
         id={`panel-${mode}`}
