@@ -24,7 +24,7 @@ export default async function DashboardPage() {
     prisma.profileAnalysis.findMany({
       where: { userId: session.user.id },
       orderBy: { createdAt: "desc" },
-      take: 10,
+      take: 3,
       select: {
         id: true,
         source: true,

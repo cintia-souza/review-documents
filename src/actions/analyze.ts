@@ -74,6 +74,19 @@ export async function analyzeProfile(
       },
     });
 
+    // Keep only last 3 analyses per user
+    const oldAnalyses = await prisma.profileAnalysis.findMany({
+      where: { userId: session.user.id },
+      orderBy: { createdAt: "desc" },
+      skip: 3,
+      select: { id: true },
+    });
+    if (oldAnalyses.length > 0) {
+      await prisma.profileAnalysis.deleteMany({
+        where: { id: { in: oldAnalyses.map((a) => a.id) } },
+      });
+    }
+
     return {
       success: true,
       data: {
