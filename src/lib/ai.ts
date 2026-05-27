@@ -63,15 +63,16 @@ DADOS DO USUÁRIO:
 INSTRUÇÃO: Busque vagas reais de "${targetRole}". Identifique competências COMPLEMENTARES mais pedidas. Cruze com as do usuário. Headline = cargo-alvo + stack agrupada + 2-3 complementares que ele domina.`;
 }
 
-async function callGroq(messages: { role: string; content: string }[]): Promise<string> {
+const FRESH_INSTRUCTION = "\n\nIMPORTANTE: Esta é uma análise NOVA e INDEPENDENTE. NÃO use informações de análises anteriores. Baseie-se EXCLUSIVAMENTE nos dados fornecidos AGORA nesta mensagem.";
+
+async function callGroq(systemPrompt: string, userContent: string): Promise<string> {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) throw new Error("Serviço de IA indisponível. Configure a GROQ_API_KEY.");
 
-  const systemMsg = messages.find((m) => m.role === "system");
-  const userMsg = messages.find((m) => m.role === "user");
-
-  // Add instruction to never use cached/previous data
-  const freshInstruction = "\n\nIMPORTANTE: Esta é uma análise NOVA e INDEPENDENTE. NÃO use informações de análises anteriores. Baseie-se EXCLUSIVAMENTE nos dados fornecidos AGORA nesta mensagem.";
+  const messages = [
+    { role: "system", content: systemPrompt + FRESH_INSTRUCTION },
+    { role: "user", content: userContent },
+  ];
 
   const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
@@ -81,10 +82,7 @@ async function callGroq(messages: { role: string; content: string }[]): Promise<
     },
     body: JSON.stringify({
       model: GROQ_MODEL,
-      messages: [
-        { role: "system", content: (systemMsg?.content ?? "") + freshInstruction },
-        { role: "user", content: userMsg?.content ?? "" },
-      ],
+      messages,
       temperature: 0.7,
       max_tokens: 4000,
       response_format: { type: "json_object" },
@@ -93,27 +91,14 @@ async function callGroq(messages: { role: string; content: string }[]): Promise<
 
   if (!response.ok) {
     if (response.status === 429) {
-      // Retry after 3 seconds
       await new Promise((r) => setTimeout(r, 3000));
-      const retryResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      const retry = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: GROQ_MODEL,
-          messages: [
-            { role: "system", content: (systemMsg?.content ?? "") + freshInstruction },
-            { role: "user", content: userMsg?.content ?? "" },
-          ],
-          temperature: 0.7,
-          max_tokens: 4000,
-          response_format: { type: "json_object" },
-        }),
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+        body: JSON.stringify({ model: GROQ_MODEL, messages, temperature: 0.7, max_tokens: 4000, response_format: { type: "json_object" } }),
       });
-      if (!retryResponse.ok) throw new Error("Limite de requisições. Aguarde alguns segundos e tente novamente.");
-      const retryData = (await retryResponse.json()) as { choices: { message: { content: string } }[] };
+      if (!retry.ok) throw new Error("Limite de requisições. Aguarde alguns segundos e tente novamente.");
+      const retryData = (await retry.json()) as { choices: { message: { content: string } }[] };
       return retryData.choices[0].message.content;
     }
     throw new Error(`Erro na API de IA: ${response.status}`);
@@ -123,26 +108,59 @@ async function callGroq(messages: { role: string; content: string }[]): Promise<
   return data.choices[0].message.content;
 }
 
+async function extractTextFromPDF(base64: string): Promise<string> {
+  // Try Gemini first (supports inline PDF natively)
+  const geminiKey = process.env.GEMINI_API_KEY;
+  if (geminiKey) {
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{
+              role: "user",
+              parts: [
+                { inlineData: { mimeType: "application/pdf", data: base64 } },
+                { text: "Extraia TODO o texto deste PDF de currículo profissional. Retorne apenas o texto extraído mantendo a estrutura (seções, títulos, datas). Sem comentários adicionais." },
+              ],
+            }],
+            generationConfig: { temperature: 0.1 },
+          }),
+        }
+      );
+      if (response.ok) {
+        const data = (await response.json()) as { candidates: { content: { parts: { text: string }[] } }[] };
+        const text = data.candidates[0].content.parts[0].text;
+        if (text && text.length > 50) return text.slice(0, 8000);
+      }
+    } catch {
+      // Gemini failed, try fallback
+    }
+  }
+
+  // Fallback: basic regex extraction
+  const buffer = Buffer.from(base64, "base64");
+  const rawText = buffer.toString("latin1");
+  const matches = rawText.match(/\(([^)]+)\)/g);
+  if (matches && matches.length > 10) {
+    const extracted = matches.map((m) => m.slice(1, -1)).join(" ");
+    if (extracted.length > 100) return extracted.slice(0, 8000);
+  }
+
+  throw new Error("Não foi possível extrair texto do PDF. Tente exportar novamente pelo LinkedIn (Perfil → Mais → Salvar como PDF).");
+}
+
 export async function analyzeWithAI(text: string, targetRole: string, userSkills: string): Promise<AIAnalysisResponse> {
   const context = buildContext(targetRole, userSkills);
-  const content = await callGroq([
-    { role: "system", content: LINKEDIN_PROMPT },
-    { role: "user", content: `${context}\n\nPERFIL LINKEDIN:\n${text}` },
-  ]);
+  const content = await callGroq(LINKEDIN_PROMPT, `${context}\n\nPERFIL LINKEDIN:\n${text}`);
   return JSON.parse(content) as AIAnalysisResponse;
 }
 
 export async function analyzePDFWithAI(base64: string, targetRole: string, userSkills: string): Promise<AIAnalysisResponse> {
   const context = buildContext(targetRole, userSkills);
-  // Groq doesn't support inline PDF — decode text from base64
-  const buffer = Buffer.from(base64, "base64");
-  const rawText = buffer.toString("utf-8");
-  const textParts = rawText.match(/[\w\s.,;:!?@#$%&*()\-+=\[\]{}'"\/\\<>áàâãéèêíìîóòôõúùûçÁÀÂÃÉÈÊÍÌÎÓÒÔÕÚÙÛÇ]+/g);
-  const pdfText = (textParts ?? []).join(" ").slice(0, 6000);
-
-  const content = await callGroq([
-    { role: "system", content: PDF_PROMPT },
-    { role: "user", content: `${context}\n\nCURRÍCULO EXTRAÍDO DO PDF:\n${pdfText}` },
-  ]);
+  const pdfText = await extractTextFromPDF(base64);
+  const content = await callGroq(PDF_PROMPT, `${context}\n\nCURRÍCULO EXTRAÍDO DO PDF:\n${pdfText}`);
   return JSON.parse(content) as AIAnalysisResponse;
 }
