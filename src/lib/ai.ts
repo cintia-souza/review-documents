@@ -101,7 +101,8 @@ async function callGroq(systemPrompt: string, userContent: string): Promise<stri
       const retryData = (await retry.json()) as { choices: { message: { content: string } }[] };
       return retryData.choices[0].message.content;
     }
-    throw new Error(`Erro na API de IA: ${response.status} - ${await response.text().catch(() => "")}`);
+    const errorBody = await response.text().catch(() => "");
+    throw new Error(`Erro na API de IA: ${response.status} - ${errorBody}`);
   }
 
   const data = (await response.json()) as { choices: { message: { content: string } }[] };
@@ -109,50 +110,16 @@ async function callGroq(systemPrompt: string, userContent: string): Promise<stri
 }
 
 async function extractTextFromPDF(base64: string): Promise<string> {
-  // Try Gemini first (supports inline PDF natively)
-  const geminiKey = process.env.GEMINI_API_KEY;
-  if (geminiKey) {
-    try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{
-              role: "user",
-              parts: [
-                { inlineData: { mimeType: "application/pdf", data: base64 } },
-                { text: "Extraia TODO o texto deste PDF de currículo profissional. Retorne apenas o texto extraído mantendo a estrutura (seções, títulos, datas). Sem comentários adicionais." },
-              ],
-            }],
-            generationConfig: { temperature: 0.1 },
-          }),
-        }
-      );
-      if (response.ok) {
-        const data = (await response.json()) as { candidates: { content: { parts: { text: string }[] } }[] };
-        const text = data.candidates[0].content.parts[0].text;
-        if (text && text.length > 50) return text.slice(0, 4000);
-      }
-    } catch {
-      // Gemini failed, try fallback
-    }
+  const { extractText } = await import("unpdf");
+  const buffer = Buffer.from(base64, "base64");
+  const result = await extractText(new Uint8Array(buffer));
+  const text = Array.isArray(result.text) ? result.text.join("\n") : String(result.text || "");
+
+  if (!text || text.trim().length < 50) {
+    throw new Error("Não foi possível extrair texto do PDF. Tente exportar novamente pelo LinkedIn (Perfil → Mais → Salvar como PDF).");
   }
 
-  // Fallback: basic regex extraction from PDF stream content
-  const buffer = Buffer.from(base64, "latin1");
-  const rawText = buffer.toString("latin1");
-  const matches = rawText.match(/\(([^)]{2,})\)/g);
-  if (matches && matches.length > 5) {
-    const extracted = matches
-      .map((m) => m.slice(1, -1))
-      .filter((t) => /[a-zA-Zà-ü]{2,}/.test(t))
-      .join(" ");
-    if (extracted.length > 100) return extracted.slice(0, 4000);
-  }
-
-  throw new Error("Não foi possível extrair texto do PDF. A API do Gemini está com cota esgotada. Aguarde o reset ou ative o billing no Google Cloud para desbloquear.");
+  return text.slice(0, 5000);
 }
 
 export async function analyzeWithAI(text: string, targetRole: string, userSkills: string): Promise<AIAnalysisResponse> {
